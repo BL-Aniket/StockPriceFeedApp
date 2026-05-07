@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* Global font */
+@font-face {
+    font-family: "Montserrat";
+    src: url("/fonts/Montserrat/Montserrat-VariableFont_wght.ttf");
+}
+
+/* Extrabold font */
+@font-face {
+    font-family: "Montserrat-ExtraBold";
+    src: url("/fonts/Montserrat/static/Montserrat-ExtraBold.ttf");
+}
+
+/* Bold font */
+@font-face {
+    font-family: "Montserrat-Bold";
+    src: url("/fonts/Montserrat/static/Montserrat-Bold.ttf");
+}
+
+* {
+    font-family: "Montserrat";
+}
