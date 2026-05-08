@@ -87,7 +87,7 @@ const SearchableDropdown = ({ company, setCompany, setSymbol, options }) => {
                                 onClick={() => handleSelect(item)}
                                 className="flex gap-2 items-center justify-start px-3 py-2 cursor-pointer hover:bg-gray-100"
                             >
-                                <div className="font-semibold">
+                                <div className="font-medium text-[15px]">
                                     {item.symbol}
                                 </div>
                                 <div className="text-xs font-medium text-gray-500">

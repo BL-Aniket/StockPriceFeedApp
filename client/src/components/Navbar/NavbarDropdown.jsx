@@ -10,9 +10,8 @@ const NavbarDropdown = () => {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -31,45 +30,62 @@ const NavbarDropdown = () => {
     }, []);
 
     return (
-        <nav className="bg-white shadow px-3 py-1 flex justify-between gap-1 items-center">
-            <FiUser className="text-indigo-500" />
-            <div className="relative" ref={dropdownRef}>
-                {/* Name */}
-                <button
-                    onClick={() => setOpen(!open)}
-                    className="font-medium text-indigo-500 hover:text-indigo-700 cursor-pointer"
-                >
+        <div className="relative" ref={dropdownRef}>
+
+            {/* BUTTON */}
+            <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 sm:px-3 py-2 hover:bg-gray-50 transition"
+            >
+                <FiUser className="text-indigo-500 text-lg" />
+
+                {/* SHOW NAME ONLY ON LARGE SCREENS */}
+                <span className="hidden lg:block text-sm font-medium text-indigo-500">
                     ANIKET.PAWAR
-                </button>
+                </span>
 
-                {/* Dropdown */}
-                {open && (
-                    <div className="absolute -right-8 mt-3 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50">
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2" onClick={() => {
-                            navigate("/profile")
-                        }}>
-                            <LuSlidersHorizontal className="text-indigo-500" />
-                            Profile
-                        </div>
+                <FaChevronDown className="text-xs text-gray-500" />
+            </button>
 
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2" onClick={() => {
-                            navigate("/alerts")
-                        }}>
-                            <FaRegBell className="text-indigo-500" />
-                            Alerts
-                        </div>
+            {/* DROPDOWN */}
+            {open && (
+                <div className="absolute right-0 mt-3 w-52 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50">
 
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2" onClick={() => {
-                            navigate("/login")
-                        }}>
-                            <IoPower className="text-indigo-500" />
-                            Logout
-                        </div>
+                    <div
+                        className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-sm"
+                        onClick={() => {
+                            navigate("/profile");
+                            setOpen(false);
+                        }}
+                    >
+                        <LuSlidersHorizontal className="text-indigo-500" />
+                        Profile
                     </div>
-                )}
-            </div>
-            <FaChevronDown />
-        </nav>
+
+                    <div
+                        className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-sm"
+                        onClick={() => {
+                            navigate("/alerts");
+                            setOpen(false);
+                        }}
+                    >
+                        <FaRegBell className="text-indigo-500" />
+                        Alerts
+                    </div>
+
+                    <div
+                        className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-sm"
+                        onClick={() => {
+                            navigate("/login");
+                            setOpen(false);
+                        }}
+                    >
+                        <IoPower className="text-indigo-500" />
+                        Logout
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
