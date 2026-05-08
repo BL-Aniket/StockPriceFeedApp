@@ -235,7 +235,7 @@ const Portfolio = () => {
                 <div className="mt-6 max-w-4xl mx-auto">
 
                     {/* MOBILE CARDS */}
-                    <div className="block lg:hidden space-y-4">
+                    {/* <div className="block lg:hidden space-y-4">
 
                         {portfoliosList.map((item, idx) => (
                             <div
@@ -332,43 +332,43 @@ const Portfolio = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
 
                     {/* DESKTOP TABLE */}
-                    <div className="hidden lg:block overflow-x-auto bg-white rounded-2xl border border-gray-200">
+                    <div className="overflow-x-auto bg-white rounded-2xl border border-gray-200">
 
                         <table className="w-full max-w-4xl">
                             <thead>
                                 <tr className="text-gray-500 bg-gray-50 border-b border-gray-200">
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Company
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Ticker
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Quantity
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Avg Buy Price
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         LTP (Live)
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Current Value
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Gain/Loss
                                     </th>
 
-                                    <th className="px-4 text-left font-semibold py-4">
+                                    <th className="px-4 text-left font-semibold py-4 text-sm">
                                         Actions
                                     </th>
                                 </tr>
