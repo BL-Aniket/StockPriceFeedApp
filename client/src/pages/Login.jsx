@@ -8,40 +8,43 @@ const Login = () => {
     const navigate = useNavigate();
 
     return (
-        <section className="min-h-screen w-full bg-gray-100 px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center min-h-screen py-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 w-full max-w-6xl items-center">
+        <section className="min-h-screen overflow-hidden w-full bg-gray-100 px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20">
+
+            <div className="flex items-center justify-center h-full">
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 xl:gap-20 w-full max-w-5xl items-center">
 
                     {/* LEFT SIDE */}
-                    <div className="order-1 lg:order-1 text-center lg:text-left">
+                    <div className="text-center lg:text-left">
+
                         <div className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-tight">
                             Welcome back!
                         </div>
 
-                        <div className="text-sm sm:text-base mt-5 text-gray-600 font-medium max-w-md mx-auto lg:mx-0">
+                        <div className="text-sm sm:text-base mt-4 text-gray-600 font-medium max-w-md mx-auto lg:mx-0">
                             Login to your account using your email and password
                         </div>
 
-                        <div className="text-sm mt-5 font-medium text-gray-600">
+                        <div className="text-sm mt-4 font-medium text-gray-600">
                             Don't have an account?{" "}
                             <span className="text-blue-700 hover:underline cursor-pointer">
                                 Register for free
                             </span>
                         </div>
 
-                        <div className="mt-10 lg:mt-20">
-                            <div className="text-sm sm:text-md text-gray-600 italic">
+                        <div className="mt-6 lg:mt-12">
+                            <div className="text-sm sm:text-base text-gray-600 italic">
                                 "I started investing at the age of 11. I was late!"
                             </div>
 
-                            <div className="text-sm sm:text-md mt-2 text-black font-semibold">
+                            <div className="text-sm sm:text-base mt-2 text-black font-semibold">
                                 Warren Buffett
                             </div>
                         </div>
                     </div>
 
                     {/* RIGHT SIDE */}
-                    <div className="order-2 lg:order-2 w-full bg-white px-5 sm:px-8 lg:px-10 py-6 sm:py-8 rounded-2xl shadow-sm">
+                    <div className="w-full bg-white px-5 sm:px-8 lg:px-10 py-6 rounded-2xl shadow-sm">
 
                         {/* GOOGLE LOGIN */}
                         <button
@@ -58,7 +61,7 @@ const Login = () => {
                         </button>
 
                         {/* DIVIDER */}
-                        <div className="flex items-center gap-2 w-full mt-6">
+                        <div className="flex items-center gap-2 w-full mt-5">
                             <div className="h-px bg-gray-300 flex-1"></div>
 
                             <div className="text-gray-500 text-sm whitespace-nowrap">
@@ -69,7 +72,7 @@ const Login = () => {
                         </div>
 
                         {/* EMAIL */}
-                        <div className="mt-6">
+                        <div className="mt-5">
                             <label
                                 htmlFor="email"
                                 className="font-semibold text-sm text-[#333]"
@@ -86,7 +89,7 @@ const Login = () => {
                         </div>
 
                         {/* PASSWORD */}
-                        <div className="mt-5">
+                        <div className="mt-4">
                             <label
                                 htmlFor="password"
                                 className="font-semibold text-sm text-[#333]"
@@ -103,9 +106,9 @@ const Login = () => {
                         </div>
 
                         {/* LOGIN + FORGOT PASSWORD */}
-                        <div className="flex flex-row gap-4 sm:gap-5 mt-6 items-center">
+                        <div className="flex items-center gap-4 mt-6">
 
-                            <div className="w-full ">
+                            <div className="flex-1">
                                 <Button
                                     style={{
                                         fontWeight: 600,
@@ -127,7 +130,7 @@ const Login = () => {
                         </div>
 
                         {/* REGISTER */}
-                        <div className="text-sm text-center mt-7 text-gray-600">
+                        <div className="text-sm text-center mt-6 text-gray-600">
                             Don't have an account?{" "}
                             <span className="text-indigo-600 font-medium hover:underline hover:cursor-pointer">
                                 Register for free
