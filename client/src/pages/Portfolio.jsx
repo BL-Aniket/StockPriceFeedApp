@@ -173,7 +173,7 @@ const Portfolio = () => {
                     <div className="w-full sm:w-52">
                         <button
                             type="submit"
-                            className="flex justify-center gap-2 items-center border border-gray-300 py-2.5 w-full text-sm rounded-lg font-medium hover:bg-gray-50 cursor-pointer"
+                            className="flex justify-center gap-2 items-center border border-gray-300 py-1.5 w-full text-sm rounded-lg font-medium hover:bg-gray-50 cursor-pointer"
                         >
                             IMPORT (.XLSX)
                         </button>

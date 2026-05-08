@@ -3,8 +3,8 @@ import React from "react";
 const Button = ({ children, size, ...props }) => {
     const sizeVariants = {
         small: "py-1.5 text-sm",
-        medium: "py-2 text-base",
-        large: "py-2.5 text-lg"
+        medium: "py-2 text-sm",
+        large: "py-2.5 text-sm"
     };
 
     return (
