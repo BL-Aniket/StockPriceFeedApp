@@ -72,7 +72,7 @@ const Navbar = () => {
                                 </div>
 
                                 <input
-                                    className="border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 placeholder:text-sm focus:shadow-sm pl-10 py-2 w-72 xl:w-80 transition"
+                                    className="border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 placeholder:text-sm focus:shadow-sm pl-10 py-1 w-72 xl:w-80 transition"
                                     placeholder="Search Portfolio..."
                                 />
                             </div>

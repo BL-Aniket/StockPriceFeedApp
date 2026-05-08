@@ -126,15 +126,17 @@ const Portfolio = () => {
         setCompany("");
         setBuyPrice("");
         setQuantity("");
+
+        setError({})
     };
 
     return (
         <section className="bg-gray-100 min-h-screen w-full py-5 sm:py-8 px-3 sm:px-5">
             {/* FORM CARD */}
-            <div className="bg-white max-w-5xl mx-auto p-5 sm:p-8 rounded-2xl border border-gray-200">
+            <div className="bg-white max-w-4xl mx-auto p-5 sm:p-8 rounded-2xl border border-gray-200">
 
                 {/* HEADING */}
-                <div className="text-2xl sm:text-3xl font-medium text-center leading-snug">
+                <div className="text-xl sm:text-2xl font-semibold text-[#444] text-center leading-snug">
                     Add companies to Core Watchlist
                 </div>
 
@@ -150,7 +152,7 @@ const Portfolio = () => {
                     <div>
                         <label
                             htmlFor="companyName"
-                            className="font-medium text-sm block mb-2"
+                            className="font-medium text-sm block mb-0.5"
                         >
                             Company Name
                         </label>
@@ -169,7 +171,7 @@ const Portfolio = () => {
                     <div>
                         <label
                             htmlFor="quantity"
-                            className="font-medium text-sm block mb-2"
+                            className="font-medium text-sm block mb-0.5"
                         >
                             Quantity
                         </label>
@@ -190,7 +192,7 @@ const Portfolio = () => {
                     <div>
                         <label
                             htmlFor="buyPrice"
-                            className="font-medium text-sm block mb-2"
+                            className="font-medium text-sm block mb-0.5"
                         >
                             Buy Price (₹)
                         </label>
@@ -230,7 +232,7 @@ const Portfolio = () => {
 
             {/* TABLE */}
             {portfoliosList?.length > 0 ? (
-                <div className="mt-6 max-w-7xl mx-auto">
+                <div className="mt-6 max-w-4xl mx-auto">
 
                     {/* MOBILE CARDS */}
                     <div className="block lg:hidden space-y-4">
@@ -313,8 +315,9 @@ const Portfolio = () => {
                                         : "text-green-500"
                                         }`}
                                 >
-                                    <MdCurrencyRupee />
-                                    {item.gainLoss} (
+                                    <div className="flex items-center justify-center"><MdCurrencyRupee />
+                                        {item.gainLoss}</div>
+                                    (
                                     {Number(item.gainLossPercent).toFixed(2)}%)
                                 </div>
 
@@ -334,38 +337,38 @@ const Portfolio = () => {
                     {/* DESKTOP TABLE */}
                     <div className="hidden lg:block overflow-x-auto bg-white rounded-2xl border border-gray-200">
 
-                        <table className="w-full min-w-[1100px]">
+                        <table className="w-full max-w-4xl">
                             <thead>
                                 <tr className="text-gray-500 bg-gray-50 border-b border-gray-200">
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Company
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Ticker
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Quantity
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Avg Buy Price
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         LTP (Live)
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Current Value
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Gain/Loss
                                     </th>
 
-                                    <th className="px-4 text-left font-medium py-4">
+                                    <th className="px-4 text-left font-semibold py-4">
                                         Actions
                                     </th>
                                 </tr>
@@ -444,7 +447,7 @@ const Portfolio = () => {
                     </div>
                 </div>
             ) : (
-                <div className="bg-white py-3 px-4 rounded-xl mx-auto w-full text-center max-w-5xl mt-6 border border-gray-200 text-sm sm:text-base">
+                <div className="bg-white py-3 px-4 rounded-xl mx-auto w-full text-center max-w-4xl mt-6 border text-gray-500 border-gray-200 text-sm sm:text-base">
                     Your Portfolio is Empty. Add a Stock or Import to Start
                     Tracking.
                 </div>

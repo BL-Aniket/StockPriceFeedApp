@@ -35,7 +35,7 @@ const NavbarDropdown = () => {
             {/* BUTTON */}
             <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 sm:px-3 py-2 hover:bg-gray-50 transition"
+                className="flex items-center gap-2 border border-gray-200 rounded-lg px-2 sm:px-3 py-1.5 hover:bg-gray-50 transition"
             >
                 <FiUser className="text-indigo-500 text-lg" />
 

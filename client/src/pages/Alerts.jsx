@@ -41,6 +41,8 @@ const Alerts = () => {
             return
         }
 
+        setError({})
+
         // setStock("")
         // setUpperLimit("")
         // setLowerLimit("")
@@ -49,13 +51,13 @@ const Alerts = () => {
     return (
         <section className="bg-gray-100 min-h-screen w-full py-5 sm:py-8 px-3 sm:px-5">
 
-            <div className="max-w-5xl mx-auto space-y-5">
+            <div className="max-w-4xl mx-auto space-y-5">
 
                 {/* ALERT SETTINGS CARD */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8">
 
                     {/* HEADING */}
-                    <div className="text-2xl sm:text-3xl font-medium text-center leading-snug">
+                    <div className="text-xl sm:text-2xl text-[#444] font-semibold text-center leading-snug">
                         Global Alert Settings
                     </div>
 
@@ -73,7 +75,7 @@ const Alerts = () => {
                         <div className="lg:col-span-3 w-full">
                             <label
                                 htmlFor="portfolio"
-                                className="font-semibold text-sm block mb-2"
+                                className="font-medium text-sm block mb-2"
                             >
                                 Stock from your Portfolio
                             </label>
@@ -106,7 +108,7 @@ const Alerts = () => {
                             <div>
                                 <label
                                     htmlFor="upperLimit"
-                                    className="font-semibold text-sm text-[#333] block"
+                                    className="font-medium text-sm text-[#333] block"
                                 >
                                     Upper Limit (+%)
                                 </label>
@@ -128,7 +130,7 @@ const Alerts = () => {
                             <div>
                                 <label
                                     htmlFor="lowerLimit"
-                                    className="font-semibold text-sm text-[#333] block"
+                                    className="font-medium text-sm text-[#333] block"
                                 >
                                     Lower Limit (-%)
                                 </label>

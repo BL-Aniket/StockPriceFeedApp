@@ -1,6 +1,8 @@
 import React from "react";
 import { Outlet, useLocation, useNavigation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
+import { FaArrowTrendDown } from "react-icons/fa6";
+import { FaArrowTrendUp } from "react-icons/fa6";
 
 const RootLayout = () => {
     const navigation = useNavigation();
@@ -16,31 +18,37 @@ const RootLayout = () => {
             symbol: "RELIANCE",
             name: "Reliance Industries Ltd.",
             ltp: 1460,
+            deviation: 0.15,
         },
         {
             symbol: "TCS",
             name: "Tata Consultancy Services Ltd.",
             ltp: 2426.8,
+            deviation: 0.11,
         },
         {
             symbol: "HDFCBANK",
             name: "HDFC Bank Ltd.",
             ltp: 775.7,
+            deviation: 0.04,
         },
         {
             symbol: "INFY",
             name: "Infosys Ltd.",
             ltp: 1175,
+            deviation: 0.07,
         },
         {
             symbol: "ITC",
             name: "ITC Ltd.",
             ltp: 311.8,
+            deviation: 0.23,
         },
         {
             symbol: "SBIN",
             name: "State Bank of India",
             ltp: 1064.5,
+            deviation: 0.09,
         },
     ];
 
@@ -88,6 +96,12 @@ const RootLayout = () => {
                                     <div className="text-gray-500 font-medium text-xs sm:text-sm">
                                         {item.ltp}
                                     </div>
+
+                                    {/* DEVIATION */}
+                                    <div className={`${item.deviation < 0.10 ? "text-red-500" : "text-green-500"} font-medium text-xs sm:text-sm flex items-center gap-1`}>
+                                        {item.deviation < 0.10 ? <FaArrowTrendDown /> : <FaArrowTrendUp />}  {item.deviation}%
+                                    </div>
+
                                 </div>
                             ))}
                         </div>
