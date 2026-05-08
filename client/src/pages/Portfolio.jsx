@@ -93,7 +93,7 @@ const Portfolio = () => {
             <div className="bg-white max-w-5xl mx-auto p-5 sm:p-8 rounded-2xl border border-gray-200">
 
                 {/* HEADING */}
-                <div className="text-3xl sm:text-4xl text-center font-medium leading-snug">
+                <div className="text-2xl sm:text-3xl font-medium text-center leading-snug">
                     Add companies to Core Watchlist
                 </div>
 

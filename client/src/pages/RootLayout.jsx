@@ -46,7 +46,6 @@ const RootLayout = () => {
 
     return (
         <section className="min-h-screen flex flex-col">
-
             {/* NAVBAR */}
             <Navbar />
 
