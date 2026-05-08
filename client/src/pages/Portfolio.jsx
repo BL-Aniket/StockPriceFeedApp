@@ -3,6 +3,7 @@ import Input from "../components/Input/Input";
 import Button from "../components/Button/Button";
 import SearchableDropdown from "../components/Input/SearchableInput";
 import { MdCurrencyRupee } from "react-icons/md";
+import validator from "validator"
 
 const Portfolio = () => {
     const [portfoliosList, setPortfoliosList] = useState([]);
@@ -10,6 +11,7 @@ const Portfolio = () => {
     const [company, setCompany] = useState("");
     const [quantity, setQuantity] = useState("");
     const [buyPrice, setBuyPrice] = useState("");
+    const [error, setError] = useState({})
 
     const options = [
         {
@@ -44,8 +46,47 @@ const Portfolio = () => {
         },
     ];
 
+    const validation = () => {
+        let validate = true;
+        const errorObj = {}
+
+        if (validator.isEmpty(company)) {
+            validate = false;
+            errorObj.companyError = "Please select a stock"
+            setError(errorObj)
+        }
+
+        if (validator.isEmpty(quantity)) {
+            validate = false;
+            errorObj.quantityError = "Please select a quantity"
+            setError(errorObj)
+        } else if (quantity <= 0) {
+            validate = false;
+            errorObj.quantityError = "The quantity should be greater than 0"
+            setError(errorObj)
+        }
+
+        if (validator.isEmpty(buyPrice)) {
+            validate = false;
+            errorObj.buyPriceError = "Please select a Buy Price"
+            setError(errorObj)
+        } else if (buyPrice <= 0) {
+            validate = false;
+            errorObj.buyPriceError = "The buy price should be greater than 0"
+            setError(errorObj)
+        }
+
+
+
+        return validate;
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (!validation()) {
+            return;
+        }
 
         const selectedPortfolio = options.find(
             (item) => item.symbol === symbol
@@ -120,6 +161,8 @@ const Portfolio = () => {
                             setSymbol={setSymbol}
                             options={options}
                         />
+
+                        {error.companyError && <div className="mt-1 text-xs sm:text-sm text-red-500">{error.companyError}</div>}
                     </div>
 
                     {/* QUANTITY */}
@@ -139,6 +182,8 @@ const Portfolio = () => {
                             placeholder="e.g. 50"
                             onChange={(e) => setQuantity(e.target.value)}
                         />
+
+                        {error.quantityError && <div className="mt-1 text-xs sm:text-sm text-red-500">{error.quantityError}</div>}
                     </div>
 
                     {/* BUY PRICE */}
@@ -158,6 +203,8 @@ const Portfolio = () => {
                             placeholder="e.g. 1500"
                             onChange={(e) => setBuyPrice(e.target.value)}
                         />
+
+                        {error.buyPriceError && <div className="mt-1 text-xs sm:text-sm text-red-500">{error.buyPriceError}</div>}
                     </div>
                 </div>
 
