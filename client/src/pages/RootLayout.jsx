@@ -51,7 +51,7 @@ const RootLayout = () => {
             <Navbar />
 
             {/* MAIN CONTENT */}
-            <main className="flex-1 pb-14">
+            <main className="flex-1">
 
                 {/* LOADING */}
                 {navigation.state === "loading" && (
