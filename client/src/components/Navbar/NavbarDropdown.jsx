@@ -12,6 +12,14 @@ const NavbarDropdown = () => {
 
     const navigate = useNavigate();
 
+    const userDetails = JSON.parse(
+        localStorage.getItem("userDetails")
+    );
+
+    const username = userDetails?.email
+        ?.split("@")[0]
+        ?.toUpperCase();
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -41,7 +49,7 @@ const NavbarDropdown = () => {
 
                 {/* SHOW NAME ONLY ON LARGE SCREENS */}
                 <span className="hidden lg:block text-sm font-medium text-indigo-500">
-                    ANIKET.PAWAR
+                    {username}
                 </span>
 
                 <FaChevronDown className="text-xs text-gray-500" />

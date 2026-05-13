@@ -1,56 +1,104 @@
-import React from "react";
-import { Outlet, useLocation, useNavigation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Outlet, useLocation, useNavigate, useNavigation } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import { FaArrowTrendDown } from "react-icons/fa6";
 import { FaArrowTrendUp } from "react-icons/fa6";
+import toast from "react-hot-toast";
+import API from "../API/axios";
 
 const RootLayout = () => {
+    const [options, setOptions] = useState([])
     const navigation = useNavigation();
     const location = useLocation();
+    const navigate = useNavigate()
+
+    const userDetailsParsed = JSON.parse(localStorage.getItem("userDetails"))
 
     const onThisPages =
         location.pathname.includes("/watchlist") ||
         location.pathname.includes("/alerts") ||
         location.pathname.includes("/profile");
 
-    const options = [
-        {
-            symbol: "RELIANCE",
-            name: "Reliance Industries Ltd.",
-            ltp: 1460,
-            deviation: 0.15,
-        },
-        {
-            symbol: "TCS",
-            name: "Tata Consultancy Services Ltd.",
-            ltp: 2426.8,
-            deviation: 0.11,
-        },
-        {
-            symbol: "HDFCBANK",
-            name: "HDFC Bank Ltd.",
-            ltp: 775.7,
-            deviation: 0.04,
-        },
-        {
-            symbol: "INFY",
-            name: "Infosys Ltd.",
-            ltp: 1175,
-            deviation: 0.07,
-        },
-        {
-            symbol: "ITC",
-            name: "ITC Ltd.",
-            ltp: 311.8,
-            deviation: 0.23,
-        },
-        {
-            symbol: "SBIN",
-            name: "State Bank of India",
-            ltp: 1064.5,
-            deviation: 0.09,
-        },
-    ];
+    useEffect(() => {
+
+        const userDetails = JSON.parse(
+            localStorage.getItem("userDetails")
+        );
+
+        if (!userDetails?.token) {
+            navigate("/login");
+            toast.error("Please login first!")
+        }
+
+    }, []);
+
+    useEffect(() => {
+        getMarketTickers();
+    }, [])
+
+
+
+    // const options = [
+    //     {
+    //         symbol: "RELIANCE",
+    //         name: "Reliance Industries Ltd.",
+    //         ltp: 1460,
+    //         deviation: 0.15,
+    //     },
+    //     {
+    //         symbol: "TCS",
+    //         name: "Tata Consultancy Services Ltd.",
+    //         ltp: 2426.8,
+    //         deviation: 0.11,
+    //     },
+    //     {
+    //         symbol: "HDFCBANK",
+    //         name: "HDFC Bank Ltd.",
+    //         ltp: 775.7,
+    //         deviation: 0.04,
+    //     },
+    //     {
+    //         symbol: "INFY",
+    //         name: "Infosys Ltd.",
+    //         ltp: 1175,
+    //         deviation: 0.07,
+    //     },
+    //     {
+    //         symbol: "ITC",
+    //         name: "ITC Ltd.",
+    //         ltp: 311.8,
+    //         deviation: 0.23,
+    //     },
+    //     {
+    //         symbol: "SBIN",
+    //         name: "State Bank of India",
+    //         ltp: 1064.5,
+    //         deviation: 0.09,
+    //     },
+    // ];
+
+    const getMarketTickers = async () => {
+        try {
+            const response = await API.get("/api/home/market-ticker", {
+                headers: {
+                    'Authorization': `Bearer ${userDetailsParsed.token}`
+                }
+            })
+
+            console.log("response.data stocks", response.data)
+
+            const result = response.data.data.map((item) => ({
+                ticker: item.ticker,
+                changePercent: item.changePercent,
+                currentPrice: item.currentPrice
+            }))
+
+            setOptions(result)
+            console.log(result)
+        } catch (error) {
+            console.log("Error getting stocks list", error.response)
+        }
+    }
 
     return (
         <section className="min-h-screen flex flex-col">
@@ -89,17 +137,17 @@ const RootLayout = () => {
                                 >
                                     {/* SYMBOL */}
                                     <div className="font-semibold text-xs sm:text-sm text-black">
-                                        {item.symbol}
+                                        {item.ticker}
                                     </div>
 
                                     {/* PRICE */}
                                     <div className="text-gray-500 font-medium text-xs sm:text-sm">
-                                        {item.ltp}
+                                        {item.currentPrice}
                                     </div>
 
                                     {/* DEVIATION */}
                                     <div className={`${item.deviation < 0.10 ? "text-red-500" : "text-green-500"} font-medium text-xs sm:text-sm flex items-center gap-1`}>
-                                        {item.deviation < 0.10 ? <FaArrowTrendDown /> : <FaArrowTrendUp />}  {item.deviation}%
+                                        {item.changePercent < 0.10 ? <FaArrowTrendDown /> : <FaArrowTrendUp />}  {item.changePercent}%
                                     </div>
 
                                 </div>

@@ -36,8 +36,8 @@ const SearchableDropdown = ({ company, setCompany, setSymbol, options }) => {
 
         const filteredData = options
             .map((item, idx) => {
-                const lowerSymbol = item.symbol.toLowerCase();
-                const lowerName = item.name.toLowerCase();
+                const lowerSymbol = item.ticker.toLowerCase();
+                const lowerName = item.companyName.toLowerCase();
                 const lowerValue = value.toLowerCase();
 
                 let score = 0;
@@ -56,9 +56,9 @@ const SearchableDropdown = ({ company, setCompany, setSymbol, options }) => {
     };
 
     const handleSelect = (item) => {
-        setCompany(item.name)
-        setSymbol(item.symbol)
-        setSearch(item.symbol);
+        setCompany(item.companyName)
+        setSymbol(item.ticker)
+        setSearch(item.ticker);
         setOpen(false);
     };
 
@@ -88,10 +88,10 @@ const SearchableDropdown = ({ company, setCompany, setSymbol, options }) => {
                                 className="flex gap-2 items-center justify-start px-3 py-2 cursor-pointer hover:bg-gray-100"
                             >
                                 <div className="font-medium text-[15px]">
-                                    {item.symbol}
+                                    {item.ticker}
                                 </div>
                                 <div className="text-xs font-medium text-gray-500">
-                                    {item.name}
+                                    {item.companyName}
                                 </div>
                             </li>
                         ))

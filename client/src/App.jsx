@@ -1,5 +1,6 @@
 import React from "react"
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
+import toast, { Toaster } from 'react-hot-toast';
 
 import Login from "./pages/Login"
 import './App.css'
@@ -8,6 +9,7 @@ import RootLayout from "./pages/RootLayout"
 import Portfolio from "./pages/Portfolio"
 import Alerts from "./pages/Alerts"
 import Profile from "./pages/Profile"
+import Register from "./pages/Register"
 
 function App() {
   const router = createBrowserRouter([
@@ -23,6 +25,10 @@ function App() {
         {
           path: "login",
           element: <Login />
+        },
+        {
+          path: "register",
+          element: <Register />
         },
         {
           path: "watchlist",
@@ -44,39 +50,49 @@ function App() {
     }
   ])
 
-  // const router = createBrowserRouter([
-  //   {
-  //     path: "/",
-  //     element: <Navigate to="/login" replace />
-  //   },
 
-  //   {
-  //     path: "/login",
-  //     element: <RootLayout />,
-  //     children: [
-  //       {
-  //         index: true,
-  //         element: <Login />
-  //       }
-  //     ]
-  //   },
-
-  //   {
-  //     path: "/watchlist",
-  //     element: <Portfolio />
-  //   },
-
-  //   {
-  //     path: "*",
-  //     element: <ErrorPage />
-  //   },
-
-
-  // ])
 
   return (
-    <RouterProvider router={router}></RouterProvider>
+    <>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+      />
+
+      <RouterProvider router={router}></RouterProvider>
+    </>
   )
 }
 
 export default App
+
+
+// const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <Navigate to="/login" replace />
+//   },
+
+//   {
+//     path: "/login",
+//     element: <RootLayout />,
+//     children: [
+//       {
+//         index: true,
+//         element: <Login />
+//       }
+//     ]
+//   },
+
+//   {
+//     path: "/watchlist",
+//     element: <Portfolio />
+//   },
+
+//   {
+//     path: "*",
+//     element: <ErrorPage />
+//   },
+
+
+// ])

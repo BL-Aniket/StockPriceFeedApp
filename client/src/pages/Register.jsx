@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import GoogleIcon from "../assets/images/google.png";
 import Input from "../components/Input/Input";
 import Button from "../components/Button/Button";
@@ -6,23 +6,51 @@ import { useNavigate } from "react-router-dom";
 import API from "../API/axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
-import validator from "validator";
+import validator from "validator"
 
-const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+const Register = () => {
+    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [submitted, setSubmitted] = useState(false)
     const [touched, setTouched] = useState({
+        username: false,
         email: false,
         password: false
     });
     const [errors, setErrors] = useState({
+        username: "",
         email: "",
         password: "",
     });
-    const [submitted, setSubmitted] = useState(false);
-
     const navigate = useNavigate();
+
+    // =========================
+    // DEBOUNCED USERNAME VALIDATION
+    // =========================
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (!username.trim()) {
+                setErrors((prev) => ({
+                    ...prev,
+                    username: "Email is required",
+                }));
+            } else if (!validator.isEmail(username)) {
+                setErrors((prev) => ({
+                    ...prev,
+                    username: "Please enter a valid email",
+                }));
+            } else {
+                setErrors((prev) => ({
+                    ...prev,
+                    username: "",
+                }));
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [username]);
 
     // =========================
     // DEBOUNCED EMAIL VALIDATION
@@ -32,7 +60,12 @@ const Login = () => {
             if (!email.trim()) {
                 setErrors((prev) => ({
                     ...prev,
-                    email: "Email is required",
+                    email: "Re-entered Email is required",
+                }));
+            } else if (username !== email) {
+                setErrors((prev) => ({
+                    ...prev,
+                    email: "Re-entered email and email didn't match",
                 }));
             } else if (!validator.isEmail(email)) {
                 setErrors((prev) => ({
@@ -85,88 +118,72 @@ const Login = () => {
         return () => clearTimeout(timer);
     }, [password]);
 
-    const handleLogin = async (e) => {
+
+    const handleRegister = async (e) => {
         try {
-            e.preventDefault();
+            e.preventDefault()
 
-            setSubmitted(true);
+            setSubmitted(true)
 
-            // Prevent login if validation errors exist
-            if (errors.email !== "" || errors.password !== "") {
+            // Prevent registration if validation errors exist
+            if (errors.username !== "" || errors.email !== "" || errors.password !== "") {
                 toast.error("Please fix validation errors");
                 return;
             }
 
             const formValues = {
-                emailOrUsername: email,
-                password: password,
-            };
-
-            console.log("formValues", formValues);
-
-            const response = await API.post("/api/auth/login", formValues);
-
-            console.log("Login Response", response.data);
-
-            const userDetails = {
-                email: response.data.data.email,
-                userId: response.data.data.userId,
-                token: response.data.data.token,
-            };
-
-            console.log("userDetails", userDetails)
-
-
-            // localStorage only stores strings
-            localStorage.setItem(
-                "userDetails",
-                JSON.stringify(userDetails)
-            );
-
-            toast.success("Login Successful");
-
-            navigate("/watchlist");
-
-            if (response.data.success) {
-                setEmail("")
-                setPassword("")
+                username: username,
+                email: email,
+                password: password
             }
 
+            console.log("formValues", formValues)
+
+            const response = await API.post("/api/auth/register", formValues)
+
+            console.log("Register Response", response.data)
+
+            toast.success("Registration Successful. Redirecting to Login");
+
+            navigate("/login");
+
         } catch (error) {
-            console.log("Error logging into the system", error);
+            console.log("Error registering into the system", error)
 
             toast.error(
-                error?.response?.data?.message || "Login failed"
+                error?.response?.data?.message || "Registration failed"
             );
         }
-    };
+    }
 
     return (
         <section className="min-h-screen overflow-hidden w-full bg-gray-100 px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20">
+
             <div className="flex items-center justify-center h-full">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 xl:gap-20 w-full max-w-5xl items-center">
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 xl:gap-20 w-full max-w-5xl items-start">
 
                     {/* LEFT SIDE */}
-                    <div className="text-center lg:text-left">
-                        <div className="text-3xl sm:text-4xl lg:text-5xl font-medium leading-tight">
-                            Welcome back!
+                    <div className="text-center lg:text-left mt-6 lg:mt-20">
+
+                        <div className="text-2xl sm:text-3xl lg:text-[40px] font-medium leading-tight">
+                            Get a free account
                         </div>
 
-                        <div className="text-sm sm:text-base mt-4 text-gray-600 font-medium max-w-md mx-auto lg:mx-0">
-                            Login to your account using your email and password
+                        <div className="text-base sm:text-lg mt-4 text-gray-600 font-medium max-w-md mx-auto lg:mx-0">
+                            Over 50 lakh investors use this for finding and tracking stock ideas.
                         </div>
 
-                        <div className="text-sm mt-4 font-medium text-gray-600">
-                            Don't have an account?{" "}
-                            <span
-                                className="text-blue-700 hover:underline cursor-pointer"
-                                onClick={() => navigate("/register")}
-                            >
-                                Register for free
+                        <div className="text-sm sm:text-base mt-4 font-medium text-gray-600">
+                            Already registered?{" "}
+                            <span className="text-blue-700 hover:underline cursor-pointer" onClick={() => {
+                                navigate("/login")
+                            }}>
+                                Login here
                             </span>
                         </div>
 
-                        <div className="mt-6 lg:mt-12">
+                        <div className="mt-6 lg:mt-32">
                             <div className="text-sm sm:text-base text-gray-600 italic">
                                 "I started investing at the age of 11. I was late!"
                             </div>
@@ -191,7 +208,7 @@ const Login = () => {
                                 className="object-cover bg-center h-4 w-4"
                             />
 
-                            LOGIN USING GOOGLE
+                            REGISTER USING GOOGLE
                         </button>
 
                         {/* DIVIDER */}
@@ -208,10 +225,39 @@ const Login = () => {
                         {/* EMAIL */}
                         <div className="mt-5">
                             <label
-                                htmlFor="email"
+                                htmlFor="username"
                                 className="font-semibold text-sm text-[#333]"
                             >
                                 Email
+                            </label>
+
+                            <Input
+                                id="username"
+                                name="username"
+                                type="email"
+                                placeholder="Enter email"
+                                onChange={(e) => { setUsername(e.target.value) }}
+                                onBlur={() => {
+                                    setTouched((prev) => ({
+                                        ...prev,
+                                        username: true
+                                    }))
+                                }}
+                            />
+
+                            {(touched.username || submitted) && errors.username && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.username}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="mt-5">
+                            <label
+                                htmlFor="email"
+                                className="font-semibold text-sm text-[#333]"
+                            >
+                                Re-enter Email
                             </label>
 
                             <Input
@@ -219,10 +265,12 @@ const Login = () => {
                                 name="email"
                                 type="email"
                                 placeholder="Enter email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => { setEmail(e.target.value) }}
                                 onBlur={() => {
-                                    setTouched(prev => ({ ...prev, email: true }))
+                                    setTouched((prev) => ({
+                                        ...prev,
+                                        email: true
+                                    }))
                                 }}
                             />
 
@@ -231,6 +279,8 @@ const Login = () => {
                                     {errors.email}
                                 </p>
                             )}
+
+                            <div className="text-gray-500 mt-2 text-xs">We promise we won't spam</div>
                         </div>
 
                         {/* PASSWORD */}
@@ -243,45 +293,37 @@ const Login = () => {
                             </label>
 
                             <div className="relative">
-                                <div
-                                    className="absolute right-2 top-5"
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                >
-                                    {showPassword ? (
-                                        <FaEye className="text-[#333] cursor-pointer" />
-                                    ) : (
-                                        <FaEyeSlash className="text-[#333] cursor-pointer" />
-                                    )}
+                                <div className="absolute right-2 top-5" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <FaEye className="text-[#333] cursor-pointer" /> : <FaEyeSlash className="text-[#333] cursor-pointer" />}
                                 </div>
 
                                 <Input
                                     id="password"
                                     name="password"
-                                    type={
-                                        !showPassword ? "password" : "text"
-                                    }
+                                    type={!showPassword ? "password" : "text"}
                                     placeholder="Enter password"
-                                    value={password}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
+                                    onChange={(e) => { setPassword(e.target.value) }}
                                     onBlur={() => {
-                                        setTouched(prev => ({ ...prev, password: true }))
+                                        setTouched((prev) => ({
+                                            ...prev,
+                                            password: true
+                                        }))
                                     }}
                                 />
-                            </div>
 
-                            {(touched.password || submitted) && errors.password && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.password}
-                                </p>
-                            )}
+                                {(touched.password || submitted) && errors.password && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.password}
+                                    </p>
+                                )}
+                            </div>
                         </div>
+
+                        <div className="text-xs mt-4 text-gray-500">By registering you agree to the <span className="text-indigo-500 hover:underline cursor-pointer">Terms of Use</span> and have read the <span className="text-indigo-500 hover:underline cursor-pointer">Privacy Policy</span>.</div>
 
                         {/* LOGIN + FORGOT PASSWORD */}
                         <div className="flex items-center gap-4 mt-6">
+
                             <div className="flex-1">
                                 <Button
                                     style={{
@@ -290,27 +332,16 @@ const Login = () => {
                                         width: "100%",
                                     }}
                                     size="large"
-                                    onClick={handleLogin}
+                                    onClick={handleRegister}
                                 >
-                                    LOGIN
+                                    CREATE ACCOUNT
                                 </Button>
                             </div>
 
-                            <div className="text-indigo-600 text-sm whitespace-nowrap font-medium hover:underline hover:cursor-pointer">
-                                Lost Password?
-                            </div>
+
                         </div>
 
-                        {/* REGISTER */}
-                        <div className="text-sm text-center mt-6 text-gray-600">
-                            Don't have an account?{" "}
-                            <span
-                                className="text-indigo-600 font-medium hover:underline hover:cursor-pointer"
-                                onClick={() => navigate("/register")}
-                            >
-                                Register for free
-                            </span>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -318,4 +349,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;
