@@ -10,7 +10,7 @@ import React, { useState, useRef, useEffect } from "react";
 //     "Strawberry"
 // ];
 
-const SearchableDropdown = ({ company, setCompany, setSymbol, options }) => {
+const SearchableDropdown = ({ company, setCompany, setSymbol, setCompanyId, options }) => {
     const [search, setSearch] = useState("");
     const [filtered, setFiltered] = useState(options);
     const [open, setOpen] = useState(false);
@@ -58,6 +58,7 @@ const SearchableDropdown = ({ company, setCompany, setSymbol, options }) => {
     const handleSelect = (item) => {
         setCompany(item.companyName)
         setSymbol(item.ticker)
+        if (setCompanyId) setCompanyId(item.id)
         setSearch(item.ticker);
         setOpen(false);
     };

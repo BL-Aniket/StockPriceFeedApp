@@ -97,6 +97,7 @@ const RootLayout = () => {
             console.log(result)
         } catch (error) {
             console.log("Error getting stocks list", error.response)
+            toast.error("Failed to load live ticker data")
         }
     }
 

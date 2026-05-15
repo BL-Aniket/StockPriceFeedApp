@@ -319,7 +319,7 @@ const Register = () => {
                             </div>
                         </div>
 
-                        <div className="text-xs mt-4 text-gray-500">By registering you agree to the <span className="text-indigo-500 hover:underline cursor-pointer">Terms of Use</span> and have read the <span className="text-indigo-500 hover:underline cursor-pointer">Privacy Policy</span>.</div>
+                        <div className="text-xs mt-4 text-gray-500">By registering you agree to the <span className="text-indigo-500 hover:underline cursor-pointer" onClick={() => toast("Terms of Use coming soon", { icon: "ℹ️" })}>Terms of Use</span> and have read the <span className="text-indigo-500 hover:underline cursor-pointer" onClick={() => toast("Privacy Policy coming soon", { icon: "ℹ️" })}>Privacy Policy</span>.</div>
 
                         {/* LOGIN + FORGOT PASSWORD */}
                         <div className="flex items-center gap-4 mt-6">
