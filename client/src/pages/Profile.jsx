@@ -60,9 +60,7 @@ const Profile = () => {
         }
     };
 
-    // =========================
-    // UPDATE PROFILE
-    // =========================
+  
     const handleUpdateProfile = async () => {
 
         try {
