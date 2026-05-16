@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 import API from "../API/axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
-import validator from "validator"
+import validator from "validator";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
     const [username, setUsername] = useState("")
@@ -26,31 +27,79 @@ const Register = () => {
     });
     const navigate = useNavigate();
 
+    const googleSignup = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+
+        try {
+
+            // Get user details from Google
+            const userInfo = await fetch(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                }
+            );
+
+            const user = await userInfo.json();
+
+            console.log("Google User", user);
+
+            // Payload for backend
+            const payload = {
+                username: user.name,
+                email: user.email,
+                password: "Google@123"
+            };
+
+            // Register API
+            await API.post(
+                "/api/auth/register",
+                payload
+            );
+
+            toast.success("Google Registration Successful");
+
+            navigate("/login");
+
+        } catch (error) {
+
+            console.log(error);
+
+            toast.error("Google Registration Failed");
+        }
+    },
+
+    onError: () => {
+        toast.error("Google Login Failed");
+    }
+});
     // =========================
     // DEBOUNCED USERNAME VALIDATION
     // =========================
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (!username.trim()) {
-                setErrors((prev) => ({
-                    ...prev,
-                    username: "Email is required",
-                }));
-            } else if (!validator.isEmail(username)) {
-                setErrors((prev) => ({
-                    ...prev,
-                    username: "Please enter a valid email",
-                }));
-            } else {
-                setErrors((prev) => ({
-                    ...prev,
-                    username: "",
-                }));
-            }
-        }, 500);
+   useEffect(() => {
+    const timer = setTimeout(() => {
+        if (!username.trim()) {
+            setErrors((prev) => ({
+                ...prev,
+                username: "Username is required",
+            }));
+        } else if (username.length < 3) {
+            setErrors((prev) => ({
+                ...prev,
+                username: "Username must be at least 3 characters",
+            }));
+        } else {
+            setErrors((prev) => ({
+                ...prev,
+                username: "",
+            }));
+        }
+    }, 500);
 
-        return () => clearTimeout(timer);
-    }, [username]);
+    return () => clearTimeout(timer);
+}, [username]);
 
     // =========================
     // DEBOUNCED EMAIL VALIDATION
@@ -58,15 +107,10 @@ const Register = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             if (!email.trim()) {
-                setErrors((prev) => ({
-                    ...prev,
-                    email: "Re-entered Email is required",
-                }));
-            } else if (username !== email) {
-                setErrors((prev) => ({
-                    ...prev,
-                    email: "Re-entered email and email didn't match",
-                }));
+    setErrors((prev) => ({
+        ...prev,
+        email: "Email is required",
+    }));
             } else if (!validator.isEmail(email)) {
                 setErrors((prev) => ({
                     ...prev,
@@ -198,8 +242,9 @@ const Register = () => {
                     <div className="w-full bg-white px-5 sm:px-8 lg:px-10 py-6 rounded-2xl shadow-sm">
 
                         {/* GOOGLE LOGIN */}
-                        <button
-                            type="submit"
+                      <button
+                            type="button"
+                            onClick={googleSignup}
                             className="flex justify-center gap-2 items-center border border-gray-300 py-3 w-full text-xs sm:text-sm rounded-lg font-semibold hover:bg-gray-50 cursor-pointer transition"
                         >
                             <img
@@ -228,14 +273,14 @@ const Register = () => {
                                 htmlFor="username"
                                 className="font-semibold text-sm text-[#333]"
                             >
-                                Email
+                                Username
                             </label>
 
                             <Input
                                 id="username"
                                 name="username"
-                                type="email"
-                                placeholder="Enter email"
+                                type="text"
+                                placeholder="Enter username"
                                 onChange={(e) => { setUsername(e.target.value) }}
                                 onBlur={() => {
                                     setTouched((prev) => ({
@@ -257,7 +302,7 @@ const Register = () => {
                                 htmlFor="email"
                                 className="font-semibold text-sm text-[#333]"
                             >
-                                Re-enter Email
+                                 Email
                             </label>
 
                             <Input

@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LuSlidersHorizontal } from "react-icons/lu";
 import { MdOutlineEdit } from "react-icons/md";
 import { RiKey2Line } from "react-icons/ri";
 import Input from "../components/Input/Input";
 import Button from "../components/Button/Button";
+import API from "../API/axios";
+import toast from "react-hot-toast";
 
 const Profile = () => {
+
     const [profileDetails, setProfileDetails] = useState(true);
     const [changePassword, setChangePassword] = useState(false);
 
@@ -39,6 +42,7 @@ const Profile = () => {
 
         try {
 
+            // CHANGE API IF YOUR SWAGGER HAS DIFFERENT ENDPOINT
             const response = await API.get(
                 "/api/auth/profile"
             );
@@ -312,7 +316,11 @@ const Profile = () => {
                                     Registered Email
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
+
+                                    <div className="font-medium break-all">
+                                        {profileData.email}
+                                    </div>
 
                                     {/* EMAIL TEXT */}
                                     {!isEditingEmail && (
@@ -373,7 +381,13 @@ const Profile = () => {
                                     id="displayName"
                                     name="displayName"
                                     type="text"
-                                    placeholder="ANIKET.PAWAR"
+                                    value={profileData.username}
+                                    onChange={(e) =>
+                                        setProfileData({
+                                            ...profileData,
+                                            username: e.target.value
+                                        })
+                                    }
                                 />
                             </div>
 
@@ -394,6 +408,13 @@ const Profile = () => {
                                         rows={5}
                                         id="about"
                                         name="about"
+                                        value={profileData.about}
+                                        onChange={(e) =>
+                                            setProfileData({
+                                                ...profileData,
+                                                about: e.target.value
+                                            })
+                                        }
                                         className="w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-blue-700 placeholder:text-sm focus:shadow-md px-3 py-3 mt-2 resize-none"
                                     />
                                 </div>
@@ -401,7 +422,10 @@ const Profile = () => {
 
                             {/* BUTTON */}
                             <div className="w-full sm:w-60 mt-8">
-                                <Button size="medium">
+                                <Button
+                                    size="medium"
+                                    onClick={handleUpdateProfile}
+                                >
                                     Save Changes
                                 </Button>
                             </div>
@@ -494,9 +518,7 @@ const Profile = () => {
                             <div className="w-full sm:w-72 mt-8">
                                 <Button
                                     size="medium"
-                                    onClick={
-                                        handleChangePassword
-                                    }
+                                    onClick={handleChangePassword}
                                 >
                                     UPDATE PASSWORD
                                 </Button>

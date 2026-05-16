@@ -7,6 +7,7 @@ import API from "../API/axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
 import validator from "validator";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -23,6 +24,74 @@ const Login = () => {
     const [submitted, setSubmitted] = useState(false);
 
     const navigate = useNavigate();
+
+    const googleLogin = useGoogleLogin({
+
+    onSuccess: async (tokenResponse) => {
+
+        try {
+
+            // Get Google User Details
+            const userInfo = await fetch(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                }
+            );
+
+            const user = await userInfo.json();
+
+            console.log("Google User", user);
+
+            // Backend Login Payload
+            const payload = {
+                emailOrUsername: user.email,
+                password: "Google@123"
+            };
+
+            // LOGIN API
+            const response = await API.post(
+                "/api/auth/login",
+                payload
+            );
+
+            console.log("Google Login Response", response.data);
+
+            // STORE USER DETAILS
+            const userDetails = {
+                email: response.data.data.email,
+                userId: response.data.data.userId,
+                username: response.data.data.username,
+                token: response.data.data.token,
+                tokenType: response.data.data.tokenType,
+            };
+
+            localStorage.setItem(
+                "userDetails",
+                JSON.stringify(userDetails)
+            );
+
+            toast.success("Google Login Successful");
+
+            navigate("/watchlist");
+
+        } catch (error) {
+
+            console.log(error);
+
+            toast.error(
+                error?.response?.data?.message ||
+                "Google Login Failed"
+            );
+        }
+    },
+
+    onError: () => {
+        toast.error("Google Authentication Failed");
+    }
+});
 
     // =========================
     // DEBOUNCED EMAIL VALIDATION
@@ -182,10 +251,11 @@ const Login = () => {
                     <div className="w-full bg-white px-5 sm:px-8 lg:px-10 py-6 rounded-2xl shadow-sm">
 
                         {/* GOOGLE LOGIN */}
-                        <button
-                            type="submit"
-                            className="flex justify-center gap-2 items-center border border-gray-300 py-3 w-full text-xs sm:text-sm rounded-lg font-semibold hover:bg-gray-50 cursor-pointer transition"
-                        >
+                            <button
+                                type="button"
+                                onClick={googleLogin}
+                                className="flex justify-center gap-2 items-center border border-gray-300 py-3 w-full text-xs sm:text-sm rounded-lg font-semibold hover:bg-gray-50 cursor-pointer transition"
+                            >
                             <img
                                 src={GoogleIcon}
                                 alt="google-icon"

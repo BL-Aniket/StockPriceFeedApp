@@ -84,8 +84,15 @@ const NavbarDropdown = () => {
                     <div
                         className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center gap-3 text-sm"
                         onClick={() => {
-                            navigate("/login");
+
+                            // Remove user details and token
+                            localStorage.removeItem("userDetails");
+
+                            // Close dropdown
                             setOpen(false);
+
+                            // Redirect to login
+                            navigate("/login");
                         }}
                     >
                         <IoPower className="text-indigo-500" />
