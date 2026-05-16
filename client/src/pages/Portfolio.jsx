@@ -1,16 +1,19 @@
-import React, { useEffect, useEffectEvent, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Input from "../components/Input/Input";
 import Button from "../components/Button/Button";
 import SearchableDropdown from "../components/Input/SearchableInput";
+import ImportExcel from "../components/ImportExcel/ImportExcel";
 import { MdCurrencyRupee } from "react-icons/md";
 import validator from "validator"
 import API from "../API/axios";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const Portfolio = () => {
     const [portfoliosList, setPortfoliosList] = useState([]);
     const [symbol, setSymbol] = useState("");
     const [company, setCompany] = useState("");
+    const [companyId, setCompanyId] = useState(0);
     const [quantity, setQuantity] = useState("");
     const [buyPrice, setBuyPrice] = useState("");
     const [options, setOptions] = useState([])
@@ -140,7 +143,8 @@ const Portfolio = () => {
 
             console.log("response.data stocks", response.data)
 
-            const result = response.data.data.map((item) => ({
+            const result = response.data.data.map((item, index) => ({
+                id: item.id || index + 1,
                 ticker: item.ticker,
                 companyName: item.companyName
             }))
@@ -149,6 +153,7 @@ const Portfolio = () => {
             console.log(result)
         } catch (error) {
             console.log("Error getting stocks list", error.response)
+            toast.error("Failed to load market tickers")
         }
     }
 
@@ -165,15 +170,17 @@ const Portfolio = () => {
             }
 
             const formValues = {
-                id: 0,
-                userId: userDetailsParsed.userId,
+                id: companyId,
+                userId: Number(userDetailsParsed.userId),
                 stockSymbol: symbol,
-                quantity: quantity,
-                buyPrice: buyPrice,
-                thresholdPrice: 0,
-                thresholdAlertSent: true
+                quantity: Number(quantity),
+                buyPrice: Number(buyPrice),
+                upperLimit: 0,
+                lowerLimit: 0,
+                upperAlertSent: true,
+                lowerAlertSent: true
             }
-
+console.log("POST BODY:", JSON.stringify(formValues, null, 2))
             if (stockID !== "") {
                 const response = await API.put(`/portfolio/${userDetailsParsed.userId}`, formValues, {
                     headers: {
@@ -201,11 +208,14 @@ const Portfolio = () => {
 
             setCompany("")
             setSymbol("")
+            setCompanyId(0)
             setQuantity("")
             setBuyPrice("")
 
         } catch (error) {
-            console.log("Error submitting portfolios", error)
+            console.log("Error submitting portfolios", error);
+            console.log("Backend response:", error?.response?.data)
+            toast.error(error?.response?.data?.message || "Failed to add stock")
         }
     }
 
@@ -222,57 +232,102 @@ const Portfolio = () => {
             setPortfoliosList(response.data)
         } catch (error) {
             console.log("Error getting portfolio list", error)
+            console.log("GET /portfolio response status:", error?.response?.status)
+            console.log("GET /portfolio response data:", error?.response?.data)
+            console.log("userId used:", userDetailsParsed.userId)
+            toast.error(
+                error?.response?.data?.message 
+                || error?.response?.data?.error 
+                || "Failed to load portfolio. Check backend logs."
+            );
         }
     }
 
-    const handleEdit = async (stockID) => {
+    const handleEdit = async (editStockId) => {
         try {
-            console.log("stockId", stockID)
-            const getData = await API.get(`/portfolio/${userDetailsParsed.userId}`, {
+            console.log("stockId", editStockId)
+            const response = await API.get(`/portfolio/${userDetailsParsed.userId}`, {
                 headers: {
                     'Authorization': `Bearer ${userDetailsParsed.token}`
                 }
             })
 
-            console.log("response edit values", getData.data)
+            console.log("response edit values", response.data)
 
+            const stock = response.data.stocks.find((item) => item.id === editStockId);
 
-            setStockID(stockID)
-
-            const result = await getData.data.stocks.map((item) => {
-                setCompany(item.companyName);
-                setQuantity(item.quantity);
-                setBuyPrice(item.buyPrice)
-            })
-
+            if (stock) {
+                setStockID(editStockId);
+                setCompany(stock.companyName || stock.company || "");
+                setSymbol(stock.symbol || stock.stockSymbol || "");
+                setQuantity(stock.quantity);
+                setBuyPrice(stock.buyPrice);
+            } else {
+                toast.error("Stock not found in portfolio");
+            }
         } catch (error) {
             console.log("Error editing the portfolio stock", error)
+            toast.error("Failed to load stock details for editing")
         }
     }
 
-    const handleDelete = async (stockID, stockSymbol) => {
+    const handleDelete = async (deleteStockId, stockSymbol) => {
         try {
-            const askConfirmation = await confirm(`Are you sure you want to remove ${stockSymbol} from your portfolio?`)
+            const result = await Swal.fire({
+                title: `Remove ${stockSymbol}?`,
+                text: "This stock will be removed from your portfolio.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ef4444",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Yes, remove it!",
+            });
 
-            if (askConfirmation) {
-                const response = await API.delete(`/portfolio/${userDetailsParsed.userId}`, {
+            if (result.isConfirmed) {
+                const response = await API.delete(`/portfolio/${deleteStockId}`, {
                     headers: {
                         'Authorization': `Bearer ${userDetailsParsed.token}`
                     }
                 })
 
-                toast.success(`Stock Portfolio ${stockSymbol} Deleted!`);
+                toast.success(`Stock ${stockSymbol} removed!`);
 
                 getData()
 
                 console.log("response delete stock", response.data)
-            } else {
-                console.log("clicked cancel")
             }
         } catch (error) {
             console.log("Error deleting stock", error)
+            toast.error("Failed to delete stock");
         }
     }
+
+
+   const handleImportAll = async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await API.post(
+                `/portfolio/bulk?userId=${userDetailsParsed.userId}`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${userDetailsParsed.token}`,
+                        'Content-Type': 'multipart/form-data',
+                    }
+                }
+            );
+
+            const addedStocks = response.data || [];
+            const count = Array.isArray(addedStocks) ? addedStocks.length : 0;
+            toast.success(`${count} stocks added to portfolio!`);
+            getData();
+        } catch (err) {
+            console.log("Bulk upload failed", err);
+            toast.error(err?.response?.data?.message || "Bulk upload failed");
+        }
+    };
 
 
     return (
@@ -306,6 +361,7 @@ const Portfolio = () => {
                             company={company}
                             setCompany={setCompany}
                             setSymbol={setSymbol}
+                            setCompanyId={setCompanyId}
                             options={options}
                             onBlur={() => {
                                 setTouched((prev) => ({
@@ -393,14 +449,11 @@ const Portfolio = () => {
                         </Button>
                     </div>
 
-                    <div className="w-full sm:w-52">
-                        <button
-                            type="submit"
-                            className="flex justify-center gap-2 items-center border border-gray-300 py-1.5 w-full text-sm rounded-lg font-medium hover:bg-gray-50 cursor-pointer"
-                        >
-                            IMPORT (.XLSX)
-                        </button>
-                    </div>
+                    <ImportExcel 
+                        onImportAll={handleImportAll}
+                        validTickers={options}
+                        portfolioStocks={portfoliosList?.stocks || []}
+                    />
                 </div>
             </div>
 
@@ -455,7 +508,7 @@ const Portfolio = () => {
                                         className="bg-white text-[15px] border-b border-gray-100"
                                     >
                                         <td className="px-4 py-4">
-                                            {item.company}
+                                            {item.companyName}
                                         </td>
 
                                         <td className="px-4 py-4">
@@ -533,191 +586,3 @@ const Portfolio = () => {
 };
 
 export default Portfolio;
-
-{/* MOBILE CARDS */ }
-{/* <div className="block lg:hidden space-y-4">
-
-                        {portfoliosList.map((item, idx) => (
-                            <div
-                                key={idx}
-                                className="bg-white rounded-2xl border border-gray-200 p-5"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="font-semibold text-lg">
-                                            {item.company}
-                                        </div>
-
-                                        <div className="text-sm text-gray-500 mt-1">
-                                            {item.symbol}
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        className={`text-sm font-medium ${item.ltp < item.buyPrice
-                                            ? "text-red-500"
-                                            : "text-green-500"
-                                            }`}
-                                    >
-                                        {Number(item.gainLossPercent).toFixed(2)}%
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4 mt-5 text-sm">
-
-                                    <div>
-                                        <div className="text-gray-500">
-                                            Quantity
-                                        </div>
-
-                                        <div className="font-medium mt-1">
-                                            {item.quantity}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div className="text-gray-500">
-                                            Buy Price
-                                        </div>
-
-                                        <div className="font-medium mt-1 flex items-center">
-                                            <MdCurrencyRupee />
-                                            {item.buyPrice}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div className="text-gray-500">
-                                            LTP
-                                        </div>
-
-                                        <div className="font-medium mt-1 flex items-center text-indigo-500">
-                                            <MdCurrencyRupee />
-                                            {item.ltp}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div className="text-gray-500">
-                                            Current Value
-                                        </div>
-
-                                        <div className="font-medium mt-1 flex items-center">
-                                            <MdCurrencyRupee />
-                                            {item.currentValue}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    className={`mt-5 flex items-center text-sm font-medium ${item.ltp < item.buyPrice
-                                        ? "text-red-500"
-                                        : "text-green-500"
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-center"><MdCurrencyRupee />
-                                        {item.gainLoss}</div>
-                                    (
-                                    {Number(item.gainLossPercent).toFixed(2)}%)
-                                </div>
-
-                                <div className="flex gap-5 mt-5">
-                                    <button className="text-sm font-medium text-blue-500">
-                                        Edit
-                                    </button>
-
-                                    <button className="text-sm font-medium text-red-500">
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div> */}
-
-// const options = [
-//     {
-//         symbol: "RELIANCE",
-//         name: "Reliance Industries Ltd.",
-//         ltp: 1460,
-//     },
-//     {
-//         symbol: "TCS",
-//         name: "Tata Consultancy Services Ltd.",
-//         ltp: 2426.8,
-//     },
-//     {
-//         symbol: "HDFCBANK",
-//         name: "HDFC Bank Ltd.",
-//         ltp: 775.7,
-//     },
-//     {
-//         symbol: "INFY",
-//         name: "Infosys Ltd.",
-//         ltp: 1175,
-//     },
-//     {
-//         symbol: "ITC",
-//         name: "ITC Ltd.",
-//         ltp: 311.8,
-//     },
-//     {
-//         symbol: "SBIN",
-//         name: "State Bank of India",
-//         ltp: 1064.5,
-//     },
-// ];
-
-
-
-
-
-// Old handleSubmit function
-
-// const handleSubmit = (e) => {
-//     e.preventDefault();
-
-//     if (!validation()) {
-//         return;
-//     }
-
-//     const selectedPortfolio = options.find(
-//         (item) => item.symbol === symbol
-//     );
-
-//     if (!selectedPortfolio) return;
-
-//     const obj = {
-//         symbol: symbol,
-//         company: company,
-//         quantity: Number(quantity),
-//         buyPrice: Number(buyPrice),
-//         ltp: selectedPortfolio.ltp,
-//         currentValue: Number(
-//             (selectedPortfolio.ltp * quantity).toFixed(2)
-//         ),
-//         gainLoss:
-//             selectedPortfolio.ltp < buyPrice
-//                 ? Number(
-//                     (
-//                         buyPrice * quantity -
-//                         selectedPortfolio.ltp * quantity
-//                     ).toFixed(2)
-//                 )
-//                 : Number(
-//                     (
-//                         selectedPortfolio.ltp * quantity -
-//                         buyPrice * quantity
-//                     ).toFixed(2)
-//                 ),
-//         gainLossPercent:
-//             ((selectedPortfolio.ltp - buyPrice) / buyPrice) * 100,
-//     };
-
-//     setPortfoliosList((prev) => [...prev, obj]);
-
-//     setCompany("");
-//     setBuyPrice("");
-//     setQuantity("");
-
-//     setError({})
-// };
