@@ -8,7 +8,7 @@ import validator from "validator"
 import API from "../API/axios";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
-
+import { useSearch } from "../context/SearchContext";
 const Portfolio = () => {
     const [portfoliosList, setPortfoliosList] = useState([]);
     const [symbol, setSymbol] = useState("");
@@ -19,6 +19,7 @@ const Portfolio = () => {
     const [options, setOptions] = useState([])
     const [stockID, setStockID] = useState("")
     const [error, setError] = useState({})
+    const { searchTerm } = useSearch();
     const [submitted, setSubmitted] = useState(false)
     const [touched, setTouched] = useState({
         companyName: false,
@@ -180,7 +181,7 @@ const Portfolio = () => {
                 upperAlertSent: true,
                 lowerAlertSent: true
             }
-console.log("POST BODY:", JSON.stringify(formValues, null, 2))
+            console.log("POST BODY:", JSON.stringify(formValues, null, 2))
             if (stockID !== "") {
                 const response = await API.put(`/portfolio/${userDetailsParsed.userId}`, formValues, {
                     headers: {
@@ -328,6 +329,16 @@ console.log("POST BODY:", JSON.stringify(formValues, null, 2))
             toast.error(err?.response?.data?.message || "Bulk upload failed");
         }
     };
+    const filteredPortfolioStocks =
+        portfoliosList?.stocks?.filter((item) => {
+
+            const search = searchTerm.toLowerCase();
+
+            return (
+                item.companyName?.toLowerCase().includes(search) ||
+                item.symbol?.toLowerCase().includes(search)
+            );
+    }) || [];
 
 
     return (
@@ -502,7 +513,7 @@ console.log("POST BODY:", JSON.stringify(formValues, null, 2))
                             </thead>
 
                             <tbody>
-                                {portfoliosList?.stocks?.map((item, idx) => (
+                                {filteredPortfolioStocks?.map((item, idx) => (
                                     <tr
                                         key={idx}
                                         className="bg-white text-[15px] border-b border-gray-100"
