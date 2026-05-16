@@ -10,6 +10,7 @@ import Portfolio from "./pages/Portfolio"
 import Alerts from "./pages/Alerts"
 import Profile from "./pages/Profile"
 import Register from "./pages/Register"
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   const router = createBrowserRouter([
@@ -31,17 +32,29 @@ function App() {
           element: <Register />
         },
         {
-          path: "watchlist",
-          element: <Portfolio />
-        },
-        {
-          path: "alerts",
-          element: <Alerts />
-        },
-        {
-          path: "profile",
-          element: <Profile />
-        },
+        path: "watchlist",
+        element: (
+          <ProtectedRoute>
+            <Portfolio />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "alerts",
+        element: (
+          <ProtectedRoute>
+            <Alerts />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        )
+      },
         {
           path: "*",
           element: <ErrorPage />
@@ -65,34 +78,3 @@ function App() {
 }
 
 export default App
-
-
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <Navigate to="/login" replace />
-//   },
-
-//   {
-//     path: "/login",
-//     element: <RootLayout />,
-//     children: [
-//       {
-//         index: true,
-//         element: <Login />
-//       }
-//     ]
-//   },
-
-//   {
-//     path: "/watchlist",
-//     element: <Portfolio />
-//   },
-
-//   {
-//     path: "*",
-//     element: <ErrorPage />
-//   },
-
-
-// ])

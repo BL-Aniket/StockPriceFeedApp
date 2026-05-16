@@ -25,7 +25,7 @@ const Navbar = () => {
                         {/* LOGO */}
                         <div
                             className="text-[#111] text-2xl font-bold cursor-pointer whitespace-nowrap"
-                            onClick={() => navigate("/")}
+                            onClick={() => navigate("/watchlist")}
                         >
                             portfolio
                             <span className="text-lime-400">alert</span>
