@@ -16,7 +16,7 @@ const NavbarDropdown = () => {
         localStorage.getItem("userDetails")
     );
 
-    const username = userDetails?.email
+    const username = userDetails?.username
         ?.split("@")[0]
         ?.toUpperCase();
 

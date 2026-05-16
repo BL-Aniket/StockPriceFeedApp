@@ -112,6 +112,7 @@ const Login = () => {
                 email: response.data.data.email,
                 userId: response.data.data.userId,
                 token: response.data.data.token,
+                username: response.data.data.username,
             };
 
             console.log("userDetails", userDetails)
