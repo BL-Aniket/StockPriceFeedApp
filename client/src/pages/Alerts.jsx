@@ -1,40 +1,85 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Input from "../components/Input/Input";
 import Button from "../components/Button/Button";
-import validator from "validator"
-
+import API from "../API/axios";
+import toast from "react-hot-toast";
+import ActiveThresholds from "../components/ActiveThresholds/ActiveThresholds";
+import AlertHistory from "../components/AlertHistory/AlertHistory";
 const Alerts = () => {
-    const [stock, setStock] = useState("")
+    const [portfolioStocks, setPortfolioStocks] = useState([]);
+    const [selectedStockId, setSelectedStockId] = useState("");
     const [upperLimit, setUpperLimit] = useState("")
     const [lowerLimit, setLowerLimit] = useState("")
     const [error, setError] = useState({})
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const userDetailsParsed = JSON.parse(localStorage.getItem("userDetails"));
+
+    useEffect(() => {
+        fetchPortfolioWithIds();
+    }, []);
+
+    const fetchPortfolioWithIds = async () => {
+        try {
+            const [tickerRes, portfolioRes] = await Promise.all([
+                API.get("/api/home/market-ticker", {
+                    headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
+                }),
+                API.get(`/portfolio/${userDetailsParsed.userId}`, {
+                    headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
+                })
+            ]);
+
+            // Build ticker → companyId map from market-ticker
+            const tickerIdMap = {};
+            (tickerRes.data.data || []).forEach((item, index) => {
+                const id = item.id || index + 1;
+                tickerIdMap[item.ticker?.toUpperCase()] = id;
+            });
+
+            // Merge portfolio stocks with company IDs
+            const stocks = (portfolioRes.data.stocks || []).map((stock) => {
+                const ticker = (stock.symbol || stock.stockSymbol || "").toUpperCase();
+                return {
+                    id: tickerIdMap[ticker] || stock.id,
+                    ticker,
+                    companyName: stock.company || stock.companyName || ticker,
+                };
+            });
+
+            setPortfolioStocks(stocks);
+        } catch (err) {
+            console.log("Error fetching portfolio for alerts", err);
+            toast.error("Failed to load portfolio stocks");
+        }
+    };
 
     const validation = () => {
         let validate = true;
         const errorObj = {}
 
-        if (validator.isEmpty(stock)) {
+        if (!selectedStockId) {
             validate = false;
             errorObj.stockError = "Please select a stock"
             setError(errorObj)
         }
 
-        if (validator.isEmpty(upperLimit)) {
+        if (!upperLimit.trim() || Number(upperLimit) <= 0) {
             validate = false;
-            errorObj.upperLimitError = "Please select an Upper Limit"
+            errorObj.upperLimitError = "Please enter a valid Upper Limit"
             setError(errorObj)
         }
 
-        if (validator.isEmpty(lowerLimit)) {
+        if (!lowerLimit.trim() || Number(lowerLimit) <= 0) {
             validate = false;
-            errorObj.lowerLimitError = "Please select a Lower Limit"
+            errorObj.lowerLimitError = "Please enter a valid Lower Limit"
             setError(errorObj)
         }
 
         return validate;
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!validation()) {
@@ -43,9 +88,26 @@ const Alerts = () => {
 
         setError({})
 
-        // setStock("")
-        // setUpperLimit("")
-        // setLowerLimit("")
+        try {
+            const response = await API.put(
+                `/portfolio/${selectedStockId}/threshold?upperLimit=${upperLimit}&lowerLimit=${lowerLimit}`,
+                {},
+                {
+                    headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
+                }
+            );
+
+            console.log("Threshold saved:", response.data);
+            toast.success(`Alert set for ${response.data.stockSymbol}: +${upperLimit}% / -${lowerLimit}%`);
+
+            setUpperLimit("");
+            setLowerLimit("");
+            setSelectedStockId("");
+            setRefreshKey((prev) => prev + 1);
+        } catch (err) {
+            console.log("Error saving threshold", err);
+            toast.error(err?.response?.data?.message || "Failed to save alert");
+        }
     }
 
     return (
@@ -80,22 +142,14 @@ const Alerts = () => {
                                 Stock from your Portfolio
                             </label>
 
-                            <select value={stock} className="border border-indigo-500 rounded-lg py-2.5 px-3 text-sm w-full focus:outline-none focus:ring-0" onChange={(e) => setStock(e.target.value)}>
-                                <option>Select holding...</option>
-
-                                <option>
-                                    Reliance Industries Ltd. (RELIANCE)
-                                </option>
-
-                                <option>
-                                    Tata Consultancy Services Ltd. (TCS)
-                                </option>
-
-                                <option>Infosys Ltd. (INFY)</option>
-
-                                <option>
-                                    OVERALL PORTFOLIO (Aggregated)
-                                </option>
+                            <select value={selectedStockId} className="border border-indigo-500 rounded-lg py-2.5 px-3 text-sm w-full focus:outline-none focus:ring-0" onChange={(e) => setSelectedStockId(e.target.value)}>
+                                <option value="">Select holding...</option>
+                                <option value="overall">OVERALL PORTFOLIO (Aggregated)</option>
+                                {portfolioStocks.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                        {s.companyName} ({s.ticker})
+                                    </option>
+                                ))}
                             </select>
 
                             {error.stockError && <div className="mt-1 text-xs sm:text-sm text-red-500">{error.stockError}</div>}
@@ -159,28 +213,10 @@ const Alerts = () => {
                 </div>
 
                 {/* ACTIVE THRESHOLDS */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8">
-
-                    <div className="text-xl sm:text-2xl font-medium">
-                        Active Thresholds
-                    </div>
-
-                    <div className="mt-4 text-sm sm:text-base font-medium text-gray-500">
-                        No active alerts configured.
-                    </div>
-                </div>
+              <ActiveThresholds key={refreshKey} />
 
                 {/* ALERT HISTORY */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8">
-
-                    <div className="text-xl sm:text-2xl font-medium">
-                        Dispatched Alerts History
-                    </div>
-
-                    <div className="mt-4 text-sm sm:text-base font-medium text-gray-500 leading-relaxed">
-                        No alerts triggered yet. Price monitoring is active.
-                    </div>
-                </div>
+               <AlertHistory />
             </div>
         </section>
     );

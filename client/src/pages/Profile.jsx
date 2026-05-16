@@ -12,6 +12,9 @@ const Profile = () => {
     const [profileDetails, setProfileDetails] = useState(true);
     const [changePassword, setChangePassword] = useState(false);
 
+    // EMAIL EDIT STATE
+    const [isEditingEmail, setIsEditingEmail] = useState(false);
+
     // PROFILE DATA
     const [profileData, setProfileData] = useState({
         username: "",
@@ -60,25 +63,55 @@ const Profile = () => {
         }
     };
 
-  
+    // =========================
+    // UPDATE PROFILE
+    // =========================
     const handleUpdateProfile = async () => {
 
         try {
 
+            if (!profileData.username) {
+                toast.error("Username is required");
+                return;
+            }
+
+            if (!profileData.email) {
+                toast.error("Email is required");
+                return;
+            }
+
+            const emailRegex =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(profileData.email)) {
+                toast.error("Please enter valid email");
+                return;
+            }
+
             const payload = {
                 username: profileData.username,
+                email: profileData.email,
                 about: profileData.about
             };
 
-            
+            console.log("Update Payload", payload);
+
             const response = await API.put(
                 "/api/auth/profile",
                 payload
             );
 
-            console.log("Update Profile Response", response.data);
+            console.log(
+                "Update Profile Response",
+                response.data
+            );
 
-            toast.success("Profile Updated Successfully");
+            toast.success(
+                "Profile Updated Successfully"
+            );
+
+            // CLOSE EMAIL EDIT
+            setIsEditingEmail(false);
 
         } catch (error) {
 
@@ -94,105 +127,109 @@ const Profile = () => {
     // =========================
     // CHANGE PASSWORD
     // =========================
-   const handleChangePassword = async () => {
+    const handleChangePassword = async () => {
 
-    try {
+        try {
 
-        // EMPTY FIELD CHECKS
-        if (!passwordData.currentPassword) {
-            toast.error("Current password is required");
-            return;
-        }
+            if (!passwordData.currentPassword) {
+                toast.error("Current password is required");
+                return;
+            }
 
-        if (!passwordData.newPassword) {
-            toast.error("New password is required");
-            return;
-        }
+            if (!passwordData.newPassword) {
+                toast.error("New password is required");
+                return;
+            }
 
-        if (!passwordData.confirmPassword) {
-            toast.error("Confirm password is required");
-            return;
-        }
+            if (!passwordData.confirmPassword) {
+                toast.error("Confirm password is required");
+                return;
+            }
 
-        // PASSWORD MATCH CHECK
-        if (
-            passwordData.newPassword !==
-            passwordData.confirmPassword
-        ) {
-            toast.error("New password and confirm password do not match");
-            return;
-        }
+            if (
+                passwordData.newPassword !==
+                passwordData.confirmPassword
+            ) {
+                toast.error(
+                    "New password and confirm password do not match"
+                );
+                return;
+            }
 
-        // SAME PASSWORD CHECK
-        if (
-            passwordData.currentPassword ===
-            passwordData.newPassword
-        ) {
-            toast.error(
-                "New password cannot be same as current password"
+            if (
+                passwordData.currentPassword ===
+                passwordData.newPassword
+            ) {
+                toast.error(
+                    "New password cannot be same as current password"
+                );
+                return;
+            }
+
+            if (passwordData.newPassword.length < 8) {
+                toast.error(
+                    "Password must be at least 8 characters"
+                );
+                return;
+            }
+
+            const payload = {
+                currentPassword:
+                    passwordData.currentPassword,
+                newPassword:
+                    passwordData.newPassword,
+                confirmPassword:
+                    passwordData.confirmPassword,
+            };
+
+            console.log(
+                "Change Password Payload",
+                payload
             );
-            return;
-        }
 
-        // PASSWORD LENGTH CHECK
-        if (passwordData.newPassword.length < 8) {
-            toast.error(
-                "Password must be at least 8 characters"
+            const response = await API.post(
+                "/api/auth/change-password",
+                payload
             );
-            return;
+
+            console.log(
+                "Change Password Response",
+                response.data
+            );
+
+            toast.success(
+                "Password Updated Successfully"
+            );
+
+            setPasswordData({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
+
+            setTimeout(() => {
+
+                localStorage.removeItem(
+                    "userDetails"
+                );
+
+                window.location.href = "/login";
+
+            }, 1500);
+
+        } catch (error) {
+
+            console.log(
+                "Change Password Error",
+                error
+            );
+
+            toast.error(
+                error?.response?.data?.message ||
+                "Password Change Failed"
+            );
         }
-
-        // API PAYLOAD
-        const payload = {
-            currentPassword: passwordData.currentPassword,
-            newPassword: passwordData.newPassword,
-            confirmPassword: passwordData.confirmPassword,
-        };
-
-        console.log("Change Password Payload", payload);
-
-        // API CALL
-        const response = await API.post(
-            "/api/auth/change-password",
-            payload
-        );
-
-        console.log(
-            "Change Password Response",
-            response.data
-        );
-
-        toast.success("Password Updated Successfully");
-
-        // CLEAR INPUTS
-        setPasswordData({
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: ""
-        });
-
-        // OPTIONAL SECURITY LOGOUT
-        setTimeout(() => {
-
-            localStorage.removeItem("userDetails");
-
-            window.location.href = "/login";
-
-        }, 1500);
-
-    } catch (error) {
-
-        console.log(
-            "Change Password Error",
-            error
-        );
-
-        toast.error(
-            error?.response?.data?.message ||
-            "Password Change Failed"
-        );
-    }
-};
+    };
 
     return (
         <section className="bg-gray-100 min-h-screen w-full py-5 sm:py-8 px-3 sm:px-5">
@@ -217,10 +254,11 @@ const Profile = () => {
 
                         {/* PROFILE DETAILS TAB */}
                         <div
-                            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm cursor-pointer transition-all duration-300 ${profileDetails
+                            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm cursor-pointer transition-all duration-300 ${
+                                profileDetails
                                     ? "border border-gray-500 bg-gray-50"
                                     : "border border-gray-300 hover:bg-gray-100"
-                                }`}
+                            }`}
                             onClick={() => {
                                 setProfileDetails(true);
                                 setChangePassword(false);
@@ -241,10 +279,11 @@ const Profile = () => {
 
                         {/* CHANGE PASSWORD TAB */}
                         <div
-                            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm cursor-pointer transition-all duration-300 ${changePassword
+                            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm cursor-pointer transition-all duration-300 ${
+                                changePassword
                                     ? "border border-gray-500 bg-gray-50"
                                     : "border border-gray-300 hover:bg-gray-100"
-                                }`}
+                            }`}
                             onClick={() => {
                                 setChangePassword(true);
                                 setProfileDetails(false);
@@ -283,11 +322,47 @@ const Profile = () => {
                                         {profileData.email}
                                     </div>
 
-                                    <div className="flex gap-1 items-center text-sm text-indigo-500">
+                                    {/* EMAIL TEXT */}
+                                    {!isEditingEmail && (
+                                        <div className="font-medium break-all">
+                                            {profileData.email}
+                                        </div>
+                                    )}
+
+                                    {/* EMAIL INPUT */}
+                                    {isEditingEmail && (
+                                        <div className="w-full sm:w-[350px]">
+                                            <Input
+                                                id="email"
+                                                name="email"
+                                                type="email"
+                                                value={profileData.email}
+                                                onChange={(e) =>
+                                                    setProfileData({
+                                                        ...profileData,
+                                                        email:
+                                                            e.target.value
+                                                    })
+                                                }
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* CHANGE BUTTON */}
+                                    <div
+                                        className="flex gap-1 items-center text-sm text-indigo-500 cursor-pointer"
+                                        onClick={() =>
+                                            setIsEditingEmail(
+                                                !isEditingEmail
+                                            )
+                                        }
+                                    >
                                         <MdOutlineEdit />
 
-                                        <div className="hover:underline cursor-pointer">
-                                            Change
+                                        <div className="hover:underline">
+                                            {isEditingEmail
+                                                ? "Cancel"
+                                                : "Change"}
                                         </div>
                                     </div>
                                 </div>
@@ -375,11 +450,14 @@ const Profile = () => {
                                     name="currentPassword"
                                     type="password"
                                     placeholder="Enter current password"
-                                    value={passwordData.currentPassword}
+                                    value={
+                                        passwordData.currentPassword
+                                    }
                                     onChange={(e) =>
                                         setPasswordData({
                                             ...passwordData,
-                                            currentPassword: e.target.value
+                                            currentPassword:
+                                                e.target.value
                                         })
                                     }
                                 />
@@ -399,11 +477,14 @@ const Profile = () => {
                                     name="newPassword"
                                     type="password"
                                     placeholder="Enter new password"
-                                    value={passwordData.newPassword}
+                                    value={
+                                        passwordData.newPassword
+                                    }
                                     onChange={(e) =>
                                         setPasswordData({
                                             ...passwordData,
-                                            newPassword: e.target.value
+                                            newPassword:
+                                                e.target.value
                                         })
                                     }
                                 />
