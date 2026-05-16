@@ -2,11 +2,11 @@ import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { IoIosSearch } from "react-icons/io";
 import NavbarDropdown from "./NavbarDropdown";
-
+import { useSearch } from "../../context/SearchContext";
 const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
-
+    const { searchTerm, setSearchTerm } = useSearch();
     const onThisPages =
         location.pathname.includes("/watchlist") ||
         location.pathname.includes("/alerts") ||
@@ -71,9 +71,11 @@ const Navbar = () => {
                                     <IoIosSearch size={18} />
                                 </div>
 
-                                <input
+                               <input
                                     className="border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 placeholder:text-sm focus:shadow-sm pl-10 py-1 w-72 xl:w-80 transition"
-                                    placeholder="Search Portfolio..."
+                                    placeholder="Search Portfolio or Alerts..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
 
