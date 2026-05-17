@@ -12,40 +12,43 @@ const Alerts = () => {
     const [lowerLimit, setLowerLimit] = useState("")
     const [error, setError] = useState({})
     const [refreshKey, setRefreshKey] = useState(0);
+    const [streamMessage, setStreamMessage] = useState("");
 
     const userDetailsParsed = JSON.parse(localStorage.getItem("userDetails"));
-
+   
     useEffect(() => {
         fetchPortfolioWithIds();
+        fetchStreamMessage();
     }, []);
+
+    useEffect(() => {
+
+            fetchStreamMessage();
+    }, [refreshKey, userDetailsParsed.userId]);
+
+    const fetchStreamMessage = async () => {
+        try {
+            const response = await API.get(`/portfolio/${userDetailsParsed.userId}/stream`, {
+                headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
+            });
+            setStreamMessage(response.data?.message || "");
+        } catch (err) {
+            console.log("Error fetching stream message", err);
+            toast.error("Failed to load alert stream status");
+        }
+    };
 
     const fetchPortfolioWithIds = async () => {
         try {
-            const [tickerRes, portfolioRes] = await Promise.all([
-                API.get("/api/home/market-ticker", {
-                    headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
-                }),
-                API.get(`/portfolio/${userDetailsParsed.userId}`, {
-                    headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
-                })
-            ]);
-
-            // Build ticker → companyId map from market-ticker
-            const tickerIdMap = {};
-            (tickerRes.data.data || []).forEach((item, index) => {
-                const id = item.id || index + 1;
-                tickerIdMap[item.ticker?.toUpperCase()] = id;
+            const portfolioRes = await API.get(`/portfolio/${userDetailsParsed.userId}`, {
+                headers: { 'Authorization': `Bearer ${userDetailsParsed.token}` }
             });
 
-            // Merge portfolio stocks with company IDs
-            const stocks = (portfolioRes.data.stocks || []).map((stock) => {
-                const ticker = (stock.symbol || stock.stockSymbol || "").toUpperCase();
-                return {
-                    id: tickerIdMap[ticker] || stock.id,
-                    ticker,
-                    companyName: stock.company || stock.companyName || ticker,
-                };
-            });
+            const stocks = (portfolioRes.data.stocks || []).map((stock) => ({
+                id: stock.id,
+                ticker: (stock.symbol || stock.stockSymbol || "").toUpperCase(),
+                companyName: stock.company || stock.companyName || stock.symbol || "",
+            }));
 
             setPortfolioStocks(stocks);
         } catch (err) {
@@ -213,10 +216,10 @@ const Alerts = () => {
                 </div>
 
                 {/* ACTIVE THRESHOLDS */}
-              <ActiveThresholds key={refreshKey} />
+              <ActiveThresholds streamMessage={streamMessage} refreshKey={refreshKey} />
 
                 {/* ALERT HISTORY */}
-               <AlertHistory />
+               <AlertHistory streamMessage={streamMessage} refreshKey={refreshKey} />
             </div>
         </section>
     );

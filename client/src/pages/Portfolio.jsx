@@ -31,6 +31,7 @@ const Portfolio = () => {
         quantity: "",
         buyPrice: "",
     });
+    const [livePrices, setLivePrices] = useState({});
 
     const userDetailsParsed = JSON.parse(localStorage.getItem("userDetails"))
 
@@ -41,6 +42,80 @@ const Portfolio = () => {
     useEffect(() => {
         getData()
     }, [])
+
+    // =========================
+    // SSE STREAM FOR LIVE PRICES
+    // =========================
+    useEffect(() => {
+        const token = userDetailsParsed.token;
+        const userId = userDetailsParsed.userId;
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
+        let reader;
+        let cancelled = false;
+
+        const connectStream = async () => {
+            try {
+                const response = await fetch(`/portfolio/${userDetailsParsed.userId}/stream`, {
+                    headers: {
+                        'Authorization': `Bearer ${userDetailsParsed.token}`,
+                        'Accept': 'text/event-stream',
+                    }
+                });
+
+                if (!response.ok) {
+                    console.log("SSE stream failed with status:", response.status);
+                    if (!cancelled) setTimeout(connectStream, 5000);
+                    return;
+                }
+
+                reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (!cancelled) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.stocks) {
+                                    const priceMap = {};
+                                    data.stocks.forEach((stock) => {
+                                        const ticker = (stock.symbol || "").toUpperCase();
+                                        priceMap[ticker] = {
+                                            currentPrice: stock.currentPrice,
+                                            currentValue: stock.currentValue,
+                                            gainLoss: stock.gainLoss,
+                                            gainLossPercent: stock.gainLossPercent,
+                                        };
+                                    });
+                                    setLivePrices(priceMap);
+                                }
+                            } catch (err) {
+                                // skip non-JSON lines (heartbeats, comments)
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.log("SSE stream error, retrying in 5s...", err);
+                if (!cancelled) setTimeout(connectStream, 5000);
+            }
+        };
+
+        connectStream();
+
+        return () => {
+            cancelled = true;
+            if (reader) reader.cancel();
+        };
+    }, []);
 
     // =========================
     // DEBOUNCED CompanyName VALIDATION
@@ -143,13 +218,7 @@ const Portfolio = () => {
             })
 
             console.log("response.data stocks", response.data)
-
-            const result = response.data.data.map((item, index) => ({
-                id: item.id || index + 1,
-                ticker: item.ticker,
-                companyName: item.companyName
-            }))
-
+            const result = response.data.data;
             setOptions(result)
             console.log(result)
         } catch (error) {
@@ -170,8 +239,11 @@ const Portfolio = () => {
                 return;
             }
 
-            const formValues = {
-                id: companyId,
+          
+            console.log("POST BODY:", JSON.stringify(formValues, null, 2))
+            if (stockID !== "") {
+                  const formValues = {
+                id: stockID,
                 userId: Number(userDetailsParsed.userId),
                 stockSymbol: symbol,
                 quantity: Number(quantity),
@@ -181,8 +253,6 @@ const Portfolio = () => {
                 upperAlertSent: true,
                 lowerAlertSent: true
             }
-            console.log("POST BODY:", JSON.stringify(formValues, null, 2))
-            if (stockID !== "") {
                 const response = await API.put(`/portfolio/${userDetailsParsed.userId}`, formValues, {
                     headers: {
                         'Authorization': `Bearer ${userDetailsParsed.token}`
@@ -195,6 +265,16 @@ const Portfolio = () => {
 
                 getData();
             } else {
+                  const formValues = {
+                userId: Number(userDetailsParsed.userId),
+                stockSymbol: symbol,
+                quantity: Number(quantity),
+                buyPrice: Number(buyPrice),
+                upperLimit: 0,
+                lowerLimit: 0,
+                upperAlertSent: true,
+                lowerAlertSent: true
+            }
                 const response = await API.post("/portfolio/add", formValues, {
                     headers: {
                         'Authorization': `Bearer ${userDetailsParsed.token}`
@@ -513,7 +593,15 @@ const Portfolio = () => {
                             </thead>
 
                             <tbody>
-                                {filteredPortfolioStocks?.map((item, idx) => (
+                                {filteredPortfolioStocks?.map((item, idx) => {
+                                    const ticker = (item.symbol || "").toUpperCase();
+                                    const live = livePrices[ticker];
+                                    const ltp = live?.currentPrice ?? item.currentPrice ?? 0;
+                                    const currentValue = live?.currentValue ?? item.currentValue ?? 0;
+                                    const gainLoss = live?.gainLoss ?? item.gainLoss ?? 0;
+                                    const gainLossPercent = live?.gainLossPercent ?? item.gainLossPercent ?? 0;
+
+                                    return (
                                     <tr
                                         key={idx}
                                         className="bg-white text-[15px] border-b border-gray-100"
@@ -540,29 +628,27 @@ const Portfolio = () => {
                                         <td className="px-4 py-4">
                                             <div className="flex items-center text-indigo-500 font-medium">
                                                 <MdCurrencyRupee />
-                                                {item.currentPrice}
+                                                {ltp}
                                             </div>
                                         </td>
 
                                         <td className="px-4 py-4">
                                             <div className="flex items-center font-medium">
                                                 <MdCurrencyRupee />
-                                                {item.currentValue}
+                                                {currentValue}
                                             </div>
                                         </td>
 
                                         <td className="px-4 py-4">
                                             <div
-                                                className={`flex items-center font-medium ${item.ltp < item.buyPrice
+                                                className={`flex items-center font-medium ${ltp < item.buyPrice
                                                     ? "text-red-500"
                                                     : "text-green-500"
                                                     }`}
                                             >
                                                 <MdCurrencyRupee />
-                                                {item.gainLoss} (
-                                                {Number(
-                                                    item.gainLossPercent
-                                                ).toFixed(2)}
+                                                {gainLoss} (
+                                                {Number(gainLossPercent).toFixed(2)}
                                                 %)
                                             </div>
                                         </td>
@@ -581,7 +667,8 @@ const Portfolio = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

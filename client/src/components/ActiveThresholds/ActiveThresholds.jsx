@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../../API/axios";
 import toast from "react-hot-toast";
 
-const ActiveThresholds = ({ key }) => {
+const ActiveThresholds = ({ streamMessage, refreshKey }) => {
     const [thresholds, setThresholds] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -10,7 +10,7 @@ const ActiveThresholds = ({ key }) => {
 
     useEffect(() => {
         fetchActiveThresholds();
-    }, []);
+    }, [streamMessage, refreshKey]);
 
     const fetchActiveThresholds = async () => {
         try {
