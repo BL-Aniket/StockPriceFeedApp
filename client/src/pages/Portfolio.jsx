@@ -238,12 +238,7 @@ const Portfolio = () => {
                 toast.error("Please fix validation errors");
                 return;
             }
-
-          
-            console.log("POST BODY:", JSON.stringify(formValues, null, 2))
-            if (stockID !== "") {
-                  const formValues = {
-                id: stockID,
+              const formValues = {
                 userId: Number(userDetailsParsed.userId),
                 stockSymbol: symbol,
                 quantity: Number(quantity),
@@ -253,7 +248,10 @@ const Portfolio = () => {
                 upperAlertSent: true,
                 lowerAlertSent: true
             }
-                const response = await API.put(`/portfolio/${userDetailsParsed.userId}`, formValues, {
+          
+            if (stockID !== "") {
+                
+                const response = await API.put(`/portfolio/${stockID}`, formValues, {
                     headers: {
                         'Authorization': `Bearer ${userDetailsParsed.token}`
                     }
@@ -265,16 +263,7 @@ const Portfolio = () => {
 
                 getData();
             } else {
-                  const formValues = {
-                userId: Number(userDetailsParsed.userId),
-                stockSymbol: symbol,
-                quantity: Number(quantity),
-                buyPrice: Number(buyPrice),
-                upperLimit: 0,
-                lowerLimit: 0,
-                upperAlertSent: true,
-                lowerAlertSent: true
-            }
+             
                 const response = await API.post("/portfolio/add", formValues, {
                     headers: {
                         'Authorization': `Bearer ${userDetailsParsed.token}`
