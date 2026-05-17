@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../../API/axios";
 import toast from "react-hot-toast";
 
-const AlertHistory = () => {
+const AlertHistory = ({ streamMessage, refreshKey }) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -10,7 +10,7 @@ const AlertHistory = () => {
 
     useEffect(() => {
         fetchAlertHistory();
-    }, []);
+    }, [streamMessage, refreshKey]);
 
     const fetchAlertHistory = async () => {
         try {
