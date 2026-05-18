@@ -18,12 +18,11 @@ const Alerts = () => {
    
     useEffect(() => {
         fetchPortfolioWithIds();
-        fetchStreamMessage();
     }, []);
 
     useEffect(() => {
 
-            fetchStreamMessage();
+        fetchStreamMessage();
     }, [refreshKey, userDetailsParsed.userId]);
 
     const fetchStreamMessage = async () => {
