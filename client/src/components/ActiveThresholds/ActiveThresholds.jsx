@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import API from "../../API/axios";
 import toast from "react-hot-toast";
-
+import { useSearch } from "../../context/SearchContext";
 const ActiveThresholds = ({ streamMessage, refreshKey }) => {
     const [thresholds, setThresholds] = useState([]);
     const [loading, setLoading] = useState(false);
-
+    const { searchTerm } = useSearch();
     const userDetailsParsed = JSON.parse(localStorage.getItem("userDetails"));
 
     useEffect(() => {
@@ -34,6 +34,16 @@ const ActiveThresholds = ({ streamMessage, refreshKey }) => {
         }
     };
 
+    const filteredThresholds = thresholds.filter((item) => {
+
+    const search = searchTerm.toLowerCase();
+
+    return (
+        item.stockSymbol?.toLowerCase().includes(search) ||
+        item.status?.toLowerCase().includes(search)
+         );
+    });
+
     return (
         <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8">
 
@@ -45,9 +55,12 @@ const ActiveThresholds = ({ streamMessage, refreshKey }) => {
                 <div className="mt-4 text-gray-500">
                     Loading...
                 </div>
-            ) : thresholds.length === 0 ? (
+            ) : filteredThresholds.length === 0 ? (
                 <div className="mt-4 text-sm sm:text-base font-medium text-gray-500">
-                    No active alerts configured.
+                    {searchTerm
+                        ? "No matching alerts found."
+                        : "No active alerts configured."
+                    }                
                 </div>
             ) : (
                 <div className="mt-6 overflow-x-auto">
@@ -64,7 +77,7 @@ const ActiveThresholds = ({ streamMessage, refreshKey }) => {
                         </thead>
 
                         <tbody>
-                            {thresholds.map((item) => (
+                            {filteredThresholds.map((item) => (
                                 <tr
                                     key={item.id}
                                     className="border-b border-gray-100"
