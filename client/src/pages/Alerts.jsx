@@ -116,7 +116,7 @@ const Alerts = () => {
     return (
         <section className="bg-gray-100 min-h-screen w-full py-5 sm:py-8 px-3 sm:px-5">
 
-            <div className="max-w-4xl mx-auto space-y-5">
+            <div className="max-w-6xl mx-auto space-y-5">
 
                 {/* ALERT SETTINGS CARD */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-8">

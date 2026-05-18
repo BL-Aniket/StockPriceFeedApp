@@ -410,7 +410,7 @@ const Portfolio = () => {
     return (
         <section className="bg-gray-100 min-h-screen w-full py-5 sm:py-8 px-3 sm:px-5">
             {/* FORM CARD */}
-            <div className="bg-white max-w-4xl mx-auto p-5 sm:p-8 rounded-2xl border border-gray-200">
+            <div className="bg-white max-w-6xl mx-auto p-5 sm:p-8 rounded-2xl border border-gray-200">
 
                 {/* HEADING */}
                 <div className="text-xl sm:text-2xl font-semibold text-[#444] text-center leading-snug">
@@ -518,7 +518,7 @@ const Portfolio = () => {
                 </div>
 
                 {/* BUTTONS */}
-                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-8">
+                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-8 ">
 
                     <div className="w-full sm:w-32">
                         <Button size="small" onClick={handleSubmit}>
@@ -536,12 +536,12 @@ const Portfolio = () => {
 
             {/* TABLE */}
             {portfoliosList ? (
-                <div className="mt-6 max-w-4xl mx-auto">
+                <div className="mt-6 max-w-6xl mx-auto">
 
                     {/* DESKTOP TABLE */}
-                    <div className="overflow-x-auto bg-white rounded-2xl border border-gray-200">
+                    <div className="overflow-x-auto w-full bg-white rounded-2xl border border-gray-200">
 
-                        <table className="w-full max-w-4xl">
+                        <table className="w-full min-w-[900px] whitespace-nowrap">
                             <thead>
                                 <tr className="text-gray-500 bg-gray-50 border-b border-gray-200">
                                     <th className="px-4 text-left font-semibold py-4 text-sm">
