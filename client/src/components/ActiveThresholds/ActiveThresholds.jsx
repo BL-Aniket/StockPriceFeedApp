@@ -63,9 +63,9 @@ const ActiveThresholds = ({ streamMessage, refreshKey }) => {
                     }                
                 </div>
             ) : (
-                <div className="mt-6 overflow-x-auto">
+                <div className="mt-6 overflow-x-auto w-full">
 
-                    <table className="w-full border-collapse">
+                    <table className="w-full min-w-[900px] whitespace-nowrap border-collapse">
 
                         <thead>
                             <tr className="border-b border-gray-200 text-left text-gray-500">
