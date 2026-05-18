@@ -227,68 +227,65 @@ const Portfolio = () => {
         }
     }
 
-    const handleSubmit = async (e) => {
-        try {
-            e.preventDefault()
+   const handleSubmit = async (e) => {
+    try {
+        e.preventDefault()
 
-            setSubmitted(true)
+        setSubmitted(true)
 
-            // Prevent registration if validation errors exist
-            if (errors.companyName !== "" || errors.quantity !== "" || errors.buyPrice !== "") {
-                toast.error("Please fix validation errors");
-                return;
-            }
-              const formValues = {
-                userId: Number(userDetailsParsed.userId),
-                stockSymbol: symbol,
-                quantity: Number(quantity),
-                buyPrice: Number(buyPrice),
-                upperLimit: 0,
-                lowerLimit: 0,
-                upperAlertSent: true,
-                lowerAlertSent: true
-            }
-          
-            if (stockID !== "") {
-                
-                const response = await API.put(`/portfolio/${stockID}`, formValues, {
-                    headers: {
-                        'Authorization': `Bearer ${userDetailsParsed.token}`
-                    }
-                })
-
-                toast.success("Stock Portfolio Edited Successfully!");
-
-                console.log("Portfolio Edited Successfully!", response.data)
-
-                getData();
-            } else {
-             
-                const response = await API.post("/portfolio/add", formValues, {
-                    headers: {
-                        'Authorization': `Bearer ${userDetailsParsed.token}`
-                    }
-                })
-
-                toast.success("Stock Portfolio Added Successfully!");
-
-                console.log("Portfolio Submitted Successfully!", response.data)
-                getData()
-            }
-
-            setCompany("")
-            setSymbol("")
-            setCompanyId(0)
-            setQuantity("")
-            setBuyPrice("")
-
-        } catch (error) {
-            console.log("Error submitting portfolios", error);
-            console.log("Backend response:", error?.response?.data)
-            toast.error(error?.response?.data?.message || "Failed to add stock")
+        // Prevent registration if validation errors exist
+        if (errors.companyName !== "" || errors.quantity !== "" || errors.buyPrice !== "") {
+            toast.error("Please fix validation errors");
+            return;
         }
-    }
 
+        const formValues = {
+            userId: Number(userDetailsParsed.userId),
+            stockSymbol: symbol,
+            quantity: Number(quantity),
+            buyPrice: Number(buyPrice),
+            upperLimit: 0,
+            lowerLimit: 0,
+            upperAlertSent: true,
+            lowerAlertSent: true
+        }
+
+        if (stockID !== "") {
+            // Update existing stock
+            const response = await API.put(`/portfolio/${stockID}`, formValues, {
+                headers: {
+                    'Authorization': `Bearer ${userDetailsParsed.token}`
+                }
+            })
+
+            toast.success("Stock Portfolio Edited Successfully!");
+            console.log("Portfolio Edited Successfully!", response.data)
+        } else {
+            // Add new stock
+            const response = await API.post("/portfolio/add", formValues, {
+                headers: {
+                    'Authorization': `Bearer ${userDetailsParsed.token}`
+                }
+            })
+
+            toast.success("Stock Portfolio Added Successfully!");
+            console.log("Portfolio Submitted Successfully!", response.data)
+        }
+
+        // Reset fields and stockID after submission
+        setStockID(""); // Ensure stockID is cleared for new additions
+        setCompany("")
+        setSymbol("")
+        setQuantity("")
+        setBuyPrice("")
+
+        getData(); // Refresh portfolio list
+    } catch (error) {
+        console.log("Error submitting portfolios", error);
+        console.log("Backend response:", error?.response?.data)
+        toast.error(error?.response?.data?.message || "Failed to add stock")
+    }
+};
     const getData = async () => {
         try {
             const response = await API.get(`/portfolio/${userDetailsParsed.userId}`, {
