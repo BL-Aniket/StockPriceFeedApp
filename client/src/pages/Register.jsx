@@ -54,10 +54,15 @@ const Register = () => {
             };
 
             // Register API
-            await API.post(
-                "/api/auth/register",
-                payload
-            );
+           await API.post(
+    "/api/auth/register",
+    payload,
+    {
+        headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+        },
+    }
+);
 
             toast.success("Google Registration Successful");
 

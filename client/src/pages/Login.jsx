@@ -54,7 +54,12 @@ const Login = () => {
             // LOGIN API
             const response = await API.post(
                 "/api/auth/login",
-                payload
+                payload,
+                {
+                   headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                }
             );
 
             console.log("Google Login Response", response.data);
